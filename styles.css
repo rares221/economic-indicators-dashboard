@@ -596,6 +596,114 @@ body.dark-mode .debug-output .debug-warning {
     border-radius: 15px;
 }
 
+/* VIX Section */
+.vix-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.vix-section h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.vix-panel {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.05) 0%, rgba(255, 87, 34, 0.05) 100%);
+    border: 2px solid rgba(255, 152, 0, 0.2);
+    border-radius: 16px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    max-width: 800px;
+    margin: 20px auto 0;
+}
+
+.vix-panel:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(255, 152, 0, 0.15);
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+.vix-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.vix-bar-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+.vix-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #666;
+}
+
+.vix-bar {
+    position: relative;
+    width: 100%;
+    height: 35px;
+    background: linear-gradient(to right, 
+        #28a745 0%, 
+        #90ee90 20%, 
+        #ffc107 40%, 
+        #ff9800 60%, 
+        #ff5722 80%, 
+        #dc3545 100%);
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    overflow: visible;
+}
+
+.vix-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vix-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.vix-scale-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.75em;
+    color: #888;
+    font-weight: 600;
+}
+
+.scale-marker {
+    position: relative;
+}
+
 /* Recession Indexes Section (Middle) */
 .recession-indexes {
     background: white;
@@ -1038,6 +1146,7 @@ body.dark-mode {
 }
 
 body.dark-mode .fear-greed-section,
+body.dark-mode .vix-section,
 body.dark-mode .recession-indexes,
 body.dark-mode .stock-indices-sidebar {
     background: #1e1e2e;
@@ -1139,6 +1248,7 @@ body.dark-mode .stock-index-card h3 {
 }
 
 body.dark-mode .fear-greed-section h2,
+body.dark-mode .vix-section h2,
 body.dark-mode .recession-indexes h2,
 body.dark-mode .conclusion-section h2,
 body.dark-mode .conclusion-box h2 {
@@ -1293,6 +1403,29 @@ body.dark-mode .debug-header {
 body.dark-mode .fear-greed-panel {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .vix-panel {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 87, 34, 0.1) 100%);
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+body.dark-mode .vix-bar {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .vix-marker {
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+body.dark-mode .vix-bar-labels .bar-label-left,
+body.dark-mode .vix-bar-labels .bar-label-right {
+    color: #e0e0e0;
+}
+
+body.dark-mode .vix-scale-markers {
+    color: #b0b0b0;
 }
 
 body.dark-mode .fear-greed-panel:hover {
@@ -1574,6 +1707,14 @@ body.dark-mode .chart-modal-close:hover {
     .fear-greed-dual-container {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+    
+    .vix-panel {
+        padding: 20px;
+    }
+    
+    .vix-bar-container {
+        max-width: 100%;
     }
     
     .fear-greed-panel {

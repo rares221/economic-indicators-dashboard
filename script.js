@@ -50,6 +50,9 @@ const STOCK_INDICES = {
     hangsen: { symbol: '^HSI', name: 'Hang Seng', region: 'Hong Kong' }
 };
 
+// VIX Symbol
+const VIX_SYMBOL = '^VIX';
+
 // Yahoo Finance API endpoints
 const YAHOO_FINANCE_QUOTE_API = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 const YAHOO_FINANCE_CORS_PROXY = 'https://api.allorigins.win/raw?url=';
@@ -82,6 +85,10 @@ const INDEX_TOOLTIPS = {
     'fear-greed': {
         title: 'Fear & Greed Index',
         description: 'Measures market sentiment from 0 (Extreme Fear) to 100 (Extreme Greed). Combines volatility, momentum, safe haven demand, and survey data to gauge investor emotions.'
+    },
+    'vix': {
+        title: 'VIX - Volatility Index',
+        description: 'The CBOE Volatility Index (VIX) measures expected market volatility over the next 30 days. Often called the "fear gauge," values below 12 indicate low volatility, 12-20 is normal, 20-30 is elevated, 30-40 is high, and above 40 indicates extreme market stress.'
     },
     'sahm': {
         title: 'Sahm Rule',
@@ -297,6 +304,7 @@ const historicalData = {
     bigmac: [],
     fearGreed: [],
     cryptoFearGreed: [],
+    vix: [],
     sp500: [],
     nasdaq: [],
     ftse100: [],
@@ -668,6 +676,130 @@ function updateCryptoFearGreedDisplay(value, classification) {
     // Draw sparkline if we have historical data
     if (historicalData.cryptoFearGreed && historicalData.cryptoFearGreed.length > 0) {
         drawSparkline('crypto-fear-greed-sparkline', historicalData.cryptoFearGreed, '#667eea');
+    }
+}
+
+// ===========================
+// VIX (VOLATILITY INDEX) FUNCTIONS
+// ===========================
+
+// Get VIX classification based on value
+function getVIXClassification(value) {
+    if (value < 12) return 'Low Volatility';
+    if (value < 20) return 'Normal Volatility';
+    if (value < 30) return 'Elevated Volatility';
+    if (value < 40) return 'High Volatility';
+    return 'Extreme Volatility';
+}
+
+// Fetch VIX data
+async function fetchVIX() {
+    try {
+        // Try direct Yahoo Finance first
+        const response = await fetch(`${YAHOO_FINANCE_QUOTE_API}${VIX_SYMBOL}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const extracted = extractYahooFinanceData(data, VIX_SYMBOL);
+        
+        if (extracted && extracted.price !== null) {
+            const value = parseFloat(extracted.price);
+            const change = extracted.change || 0;
+            const changePercent = extracted.changePercent || 0;
+            const classification = getVIXClassification(value);
+            
+            // Save to cache
+            savePreviousValue('vix', value);
+            
+            // Update display
+            updateVIXDisplay(value, classification, change, changePercent);
+            updateTimestamp('vix-updated');
+            
+            // Add to historical data
+            addToHistory('vix', value);
+            
+            return value;
+        } else {
+            throw new Error('Invalid response structure');
+        }
+        
+    } catch (error) {
+        console.error('VIX fetch error:', error);
+        
+        // Try CORS proxy fallback
+        try {
+            const proxyUrl = `${YAHOO_FINANCE_CORS_PROXY}${encodeURIComponent(YAHOO_FINANCE_QUOTE_API + VIX_SYMBOL)}`;
+            const response = await fetch(proxyUrl);
+            
+            if (response.ok) {
+                const data = await response.json();
+                const extracted = extractYahooFinanceData(data, VIX_SYMBOL);
+                
+                if (extracted && extracted.price !== null) {
+                    const value = parseFloat(extracted.price);
+                    const change = extracted.change || 0;
+                    const changePercent = extracted.changePercent || 0;
+                    const classification = getVIXClassification(value);
+                    
+                    savePreviousValue('vix', value);
+                    updateVIXDisplay(value, classification, change, changePercent);
+                    updateTimestamp('vix-updated');
+                    addToHistory('vix', value);
+                    
+                    return value;
+                }
+            }
+        } catch (proxyError) {
+            console.error('VIX proxy fetch error:', proxyError);
+        }
+        
+        // Fallback: Use cached value
+        const cachedValue = getPreviousValue('vix');
+        if (cachedValue !== null && !isNaN(cachedValue)) {
+            const classification = getVIXClassification(cachedValue);
+            updateVIXDisplay(cachedValue, classification + ' (Cached)', 0, 0);
+            return cachedValue;
+        }
+        
+        // Last resort: Use estimated value
+        const fallbackValue = 18.5;
+        const classification = getVIXClassification(fallbackValue);
+        updateVIXDisplay(fallbackValue, classification + ' (Estimated)', 0, 0);
+        return fallbackValue;
+    }
+}
+
+// Update VIX display
+function updateVIXDisplay(value, classification, change = 0, changePercent = 0) {
+    document.getElementById('vix-value').textContent = value.toFixed(2);
+    document.getElementById('vix-label').textContent = classification;
+    
+    // Update change display
+    const changeEl = document.getElementById('vix-change');
+    if (changeEl) {
+        const changeText = change >= 0 ? `+${change.toFixed(2)}` : change.toFixed(2);
+        const percentText = changePercent >= 0 ? `+${changePercent.toFixed(2)}%` : `${changePercent.toFixed(2)}%`;
+        changeEl.textContent = `${changeText} (${percentText})`;
+        changeEl.className = 'gauge-change ' + (change >= 0 ? 'positive' : 'negative');
+    }
+    
+    // Update bar position (scale 0-100, but VIX typically ranges 10-80)
+    // We'll cap display at 100 for extreme cases
+    const bar = document.getElementById('vix-bar');
+    const marker = document.getElementById('vix-marker');
+    if (bar && marker) {
+        const displayValue = Math.min(value, 100);
+        const percentage = displayValue;
+        
+        marker.style.left = `${percentage}%`;
+    }
+    
+    // Draw sparkline if we have historical data
+    if (historicalData.vix && historicalData.vix.length > 0) {
+        drawSparkline('vix-sparkline', historicalData.vix, '#ff9800');
     }
 }
 
@@ -1524,12 +1656,14 @@ async function initDashboard() {
     // Show loading state
     document.getElementById('fear-greed-label').textContent = 'Loading...';
     document.getElementById('crypto-fear-greed-label').textContent = 'Loading...';
+    document.getElementById('vix-label').textContent = 'Loading...';
     
     // Load main content first (faster)
     try {
         await Promise.all([
             fetchFearGreedIndex(),
             fetchCryptoFearGreedIndex(),
+            fetchVIX(),
             fetchRecessionIndexes()
         ]);
     } catch (error) {
@@ -1548,6 +1682,8 @@ async function initDashboard() {
             // Load main content and stock indices in parallel
             await Promise.allSettled([
                 fetchFearGreedIndex(),
+                fetchCryptoFearGreedIndex(),
+                fetchVIX(),
                 fetchRecessionIndexes(),
                 fetchAllStockIndices()
             ]);
@@ -2335,6 +2471,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refresh-fear-greed');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', refreshFearGreedIndex);
+    }
+    
+    // Add VIX refresh button handler
+    const refreshVixBtn = document.getElementById('refresh-vix');
+    if (refreshVixBtn) {
+        refreshVixBtn.addEventListener('click', async () => {
+            refreshVixBtn.classList.add('loading');
+            refreshVixBtn.disabled = true;
+            await fetchVIX();
+            refreshVixBtn.classList.remove('loading');
+            refreshVixBtn.disabled = false;
+        });
     }
     
     // Add debug toggle handler

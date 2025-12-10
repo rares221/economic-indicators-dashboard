@@ -9,20 +9,20 @@ A comprehensive, real-time web application that displays various economic indica
 
 ---
 
-## ✨ Features
+## Features
 
-### 📈 Market Sentiment
+###  Market Sentiment
 - **Stock Market Fear & Greed Index**: Real-time sentiment from CNN's API
 - **Crypto Market Fear & Greed Index**: Real-time crypto sentiment from Alternative.me API
 - **Side-by-side comparison**: Compare stock vs crypto market sentiment
 
-### 📊 Stock Market Data
+###  Stock Market Data
 - **8 Major Global Indices**: S&P 500, NASDAQ, FTSE 100, DAX, STOXX 600, Nikkei 225, Shanghai Composite, Hang Seng
 - **Real-time prices** with smart decimal formatting (e.g., "6,050.6 pts")
 - **Daily changes** and percentage movements
 - **Sparkline charts** showing recent trends
 
-### 📉 Recession Indicators
+###  Recession Indicators
 - **Sahm Rule** (unemployment-based)
 - **Yield Curve** (10Y-2Y Treasury spread)
 - **Unemployment Rate**
@@ -34,7 +34,7 @@ A comprehensive, real-time web application that displays various economic indica
 - **ADS Index** (business conditions)
 - Plus: Used Car, Lego, Frozen Pizza, Men's Underwear, and Big Mac indexes
 
-### 📈 Interactive Charts
+###  Interactive Charts
 - **Click any indicator** to view detailed historical charts
 - **Multiple timeframes**: 7 days, 30 days, 90 days, or 1 year
 - **Statistics panel**: Current, average, high, low, and change percentage
@@ -45,16 +45,16 @@ A comprehensive, real-time web application that displays various economic indica
 - **📊 CSV Export**: Export all data to spreadsheet format
 - **🔗 Share URL**: Generate shareable link with current state
 
-### 🎨 UI/UX
-- **🌙 Dark Mode**: Toggle between light and dark themes
-- **📱 Responsive Design**: Works on desktop, tablet, and mobile
-- **🎨 Modern Gradients**: Beautiful visual design
-- **⚡ Smooth Animations**: Polished micro-interactions
-- **🐛 Debug Console**: Built-in API debugging tools
+###  UI/UX
+- ** Dark Mode**: Toggle between light and dark themes
+- ** Responsive Design**: Works on desktop, tablet, and mobile
+- ** Modern Gradients**: Beautiful visual design
+- ** Smooth Animations**: Polished micro-interactions
+- ** Debug Console**: Built-in API debugging tools
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Option 1: Just Open It
 ```
@@ -72,7 +72,7 @@ A comprehensive, real-time web application that displays various economic indica
 
 ---
 
-## 🔧 Setup
+##  Setup
 
 ### No API Keys Required!
 The dashboard works immediately with:
@@ -95,7 +95,7 @@ The dashboard works immediately with:
 
 ---
 
-## 📖 How to Use
+##  How to Use
 
 ### View Historical Data
 - Click any Fear & Greed panel, recession indicator card, or stock index card
@@ -104,9 +104,9 @@ The dashboard works immediately with:
 - View detailed statistics below the chart
 
 ### Export Data
-- **📸 Camera icon**: Export dashboard as PNG image
-- **📊 Chart icon**: Export all data as CSV file
-- **🔗 Link icon**: Copy shareable URL to clipboard
+- ** Camera icon**: Export dashboard as PNG image
+- ** Chart icon**: Export all data as CSV file
+- ** Link icon**: Copy shareable URL to clipboard
 
 ### Toggle Dark Mode
 - Click the 🌙/☀️ icon in the header
@@ -119,7 +119,7 @@ The dashboard works immediately with:
 
 ---
 
-## 🌐 Data Sources
+##  Data Sources
 
 ### Real-Time APIs (No Keys Required)
 | Source | Data | Status |
@@ -142,7 +142,7 @@ The dashboard always shows something useful, even if APIs are down.
 
 ---
 
-## 🛠️ Technical Details
+##  Technical Details
 
 ### Technologies
 - **Vanilla JavaScript** - No frameworks
@@ -181,7 +181,7 @@ economic-indicators-dashboard/
 
 ---
 
-## 🔬 API Testing Tool
+##  API Testing Tool
 
 Open `test-api.html` for comprehensive API testing:
 
@@ -202,20 +202,20 @@ Open `test-api.html` for comprehensive API testing:
 
 ---
 
-## 🎯 Recent Updates
+##  Recent Updates
 
 ### December 2024
-- ✅ Added Crypto Fear & Greed Index
-- ✅ Implemented historical charts with Chart.js
-- ✅ Added export features (PNG, CSV, Share URL)
-- ✅ Integrated Yahoo Finance for real stock data
-- ✅ Created comprehensive API testing tool
-- ✅ Added smart decimal formatting for indices
-- ✅ Improved error handling and fallbacks
+-  Added Crypto Fear & Greed Index
+-  Implemented historical charts with Chart.js
+-  Added export features (PNG, CSV, Share URL)
+-  Integrated Yahoo Finance for real stock data
+-  Created comprehensive API testing tool
+-  Added smart decimal formatting for indices
+-  Improved error handling and fallbacks
 
 ---
 
-## 💡 Tips & Tricks
+##  Tips & Tricks
 
 ### Keyboard Shortcuts
 - `Esc` - Close chart modal
@@ -237,7 +237,7 @@ Open `test-api.html` for comprehensive API testing:
 
 ---
 
-## 🔒 Privacy & Data
+##  Privacy & Data
 
 - **No data collection**: Everything runs in your browser
 - **No tracking**: No analytics or cookies
@@ -247,7 +247,7 @@ Open `test-api.html` for comprehensive API testing:
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 This project uses data from:
 - **CNN** - Stock Market Fear & Greed Index
@@ -261,10 +261,10 @@ Built with:
 
 ---
 
-## 📝 License
+## License
 
 All rights reserved. Private project for personal use.
 
 ---
 
-**Made with ❤️ for economic data enthusiasts**
+**Made for economic data enthusiasts**

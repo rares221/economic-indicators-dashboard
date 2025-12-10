@@ -225,6 +225,47 @@
             </div>
         </section>
 
+        <!-- VIX (Volatility Index) Section -->
+        <section class="vix-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>VIX - Volatility Index <span class="help-icon" data-tooltip="vix">?</span></h2>
+                <button id="refresh-vix" class="refresh-button" title="Refresh VIX">🔄</button>
+            </div>
+            <div class="last-updated" id="vix-updated">--</div>
+            
+            <div class="vix-panel">
+                <div class="vix-content">
+                    <div class="index-value" id="vix-value">--</div>
+                    <div class="index-label" id="vix-label">Loading...</div>
+                    <div class="gauge-change" id="vix-change">--</div>
+                    
+                    <div class="vix-bar-container">
+                        <div class="vix-bar-labels">
+                            <span class="bar-label-left">Low Volatility</span>
+                            <span class="bar-label-right">Extreme Volatility</span>
+                        </div>
+                        <div class="vix-bar">
+                            <div class="vix-bar-fill" id="vix-bar"></div>
+                            <div class="vix-marker" id="vix-marker"></div>
+                        </div>
+                        <div class="vix-scale-markers">
+                            <span class="scale-marker" style="left: 0%;">0</span>
+                            <span class="scale-marker" style="left: 20%;">20</span>
+                            <span class="scale-marker" style="left: 40%;">40</span>
+                            <span class="scale-marker" style="left: 60%;">60</span>
+                            <span class="scale-marker" style="left: 80%;">80</span>
+                            <span class="scale-marker" style="left: 100%;">100+</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trend-section">
+                        <div class="trend-label">30-Day Trend</div>
+                        <canvas id="vix-sparkline" class="sparkline" width="200" height="30"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Recession Indexes Section (Middle) -->
         <section class="recession-indexes">
             <h2>Unofficial Recession Indexes</h2>

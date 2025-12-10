@@ -281,6 +281,7 @@
             <button class="btn" onclick="testStockFearGreed()">📈 Stock F&G</button>
             <button class="btn" onclick="testCryptoFearGreed()">₿ Crypto F&G</button>
             <button class="btn" onclick="testYahooFinance()">📊 Yahoo Finance</button>
+            <button class="btn" onclick="testVIX()">📉 VIX Index</button>
             <button class="btn" onclick="testFREDData()">🏦 FRED Data</button>
             <button class="btn danger" onclick="clearAllLogs()">🗑️ Clear All</button>
         </div>
@@ -340,6 +341,25 @@
                 <div class="result-box" id="yahoo-result" style="display: none;">
                     <div class="result-title">✓ Result</div>
                     <div class="result-data" id="yahoo-data"></div>
+                </div>
+            </div>
+
+            <!-- VIX Volatility Index -->
+            <div class="test-section">
+                <div class="test-header">
+                    <div class="test-title">📉 VIX - Volatility Index</div>
+                    <div class="status-badge status-pending" id="vix-status">Pending</div>
+                </div>
+                <div class="test-info">
+                    <strong>Source:</strong> Yahoo Finance API<br>
+                    <strong>Auth:</strong> None required<br>
+                    <strong>Rate Limit:</strong> Generous (free)
+                </div>
+                <div class="test-url" id="vix-url">https://query1.finance.yahoo.com/v8/finance/chart/^VIX?interval=1d&range=1d</div>
+                <div class="log-container" id="vix-log"></div>
+                <div class="result-box" id="vix-result" style="display: none;">
+                    <div class="result-title">✓ Result</div>
+                    <div class="result-data" id="vix-data"></div>
                 </div>
             </div>
 
@@ -612,6 +632,91 @@
                         changePercent: changePercent.toFixed(2) + '%',
                         currency: meta.currency,
                         exchangeName: meta.exchangeName,
+                        marketState: meta.marketState
+                    });
+                    
+                    updateStatus(statusId, 'success');
+                    stats.success++;
+                } else {
+                    throw new Error('Invalid data structure');
+                }
+                
+            } catch (error) {
+                log(logId, `✗ Error: ${error.message}`, 'error');
+                updateStatus(statusId, 'error');
+                stats.failed++;
+            }
+            
+            updateStats();
+        }
+
+        // Test VIX
+        async function testVIX() {
+            const logId = 'vix-log';
+            const statusId = 'vix-status';
+            
+            updateStatus(statusId, 'loading');
+            log(logId, '🚀 Starting VIX test...', 'info');
+            
+            const startTime = performance.now();
+            stats.total++;
+            
+            try {
+                const url = 'https://query1.finance.yahoo.com/v8/finance/chart/^VIX?interval=1d&range=1d';
+                log(logId, `📡 Attempting direct fetch...`, 'info');
+                
+                let response, data;
+                
+                // Try direct first
+                try {
+                    response = await fetch(url);
+                    if (response.ok) {
+                        data = await response.json();
+                        log(logId, `✓ Direct fetch successful!`, 'success');
+                    }
+                } catch (corsError) {
+                    log(logId, `⚠ Direct fetch blocked by CORS, trying proxy...`, 'warning');
+                    
+                    // Try with proxy
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                    response = await fetch(proxyUrl);
+                    data = await response.json();
+                    log(logId, `✓ Proxy fetch successful!`, 'success');
+                }
+                
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                stats.times.push(duration);
+                
+                log(logId, `✓ Response received in ${duration}ms`, 'success');
+                
+                if (data && data.chart && data.chart.result && data.chart.result.length > 0) {
+                    const result = data.chart.result[0];
+                    const meta = result.meta;
+                    
+                    const price = meta.regularMarketPrice;
+                    const previousClose = meta.chartPreviousClose || meta.previousClose;
+                    const change = price - previousClose;
+                    const changePercent = (change / previousClose) * 100;
+                    
+                    // VIX classification
+                    let classification;
+                    if (price < 12) classification = 'Low Volatility';
+                    else if (price < 20) classification = 'Normal Volatility';
+                    else if (price < 30) classification = 'Elevated Volatility';
+                    else if (price < 40) classification = 'High Volatility';
+                    else classification = 'Extreme Volatility';
+                    
+                    log(logId, `✓ VIX: ${price.toFixed(2)} - ${classification}`, 'success');
+                    log(logId, `✓ Change: ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePercent.toFixed(2)}%)`, 'success');
+                    
+                    showResult('vix-result', 'vix-data', {
+                        symbol: meta.symbol,
+                        price: price.toFixed(2),
+                        classification: classification,
+                        previousClose: previousClose.toFixed(2),
+                        change: change.toFixed(2),
+                        changePercent: changePercent.toFixed(2) + '%',
                         marketState: meta.marketState
                     });
                     
