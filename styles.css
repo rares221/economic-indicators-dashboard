@@ -1,0 +1,1505 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Stock Indices Sidebar */
+.stock-indices-sidebar {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 20px;
+}
+
+.stock-indices-sidebar h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.3em;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.last-updated {
+    text-align: center;
+    font-size: 0.75em;
+    color: #888;
+    margin-bottom: 12px;
+    font-style: italic;
+}
+
+.stock-indices-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stock-index-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stock-index-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stock-index-card h3 {
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    color: #555;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.stock-region {
+    font-size: 0.65em;
+    color: #888;
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stock-price {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #667eea;
+    text-align: center;
+    margin-bottom: 3px;
+    line-height: 1.1;
+}
+
+.stock-label-small {
+    font-size: 0.6em;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+    margin-bottom: 1px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.stock-change {
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.stock-change.positive {
+    color: #28a745;
+}
+
+.stock-change.negative {
+    color: #dc3545;
+}
+
+.stock-change.neutral {
+    color: #6c757d;
+}
+
+.stock-change-percent {
+    font-size: 0.75em;
+    text-align: center;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+header h1 {
+    color: white;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 10px;
+    z-index: 1000;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.export-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.3em;
+    backdrop-filter: blur(10px);
+}
+
+.export-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.theme-toggle-container {
+    display: flex;
+}
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    padding: 0;
+    margin: 0;
+    z-index: 1000;
+    position: relative;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.theme-icon {
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+/* Refresh Button */
+.refresh-button {
+    background: rgba(102, 126, 234, 0.2);
+    border: 2px solid rgba(102, 126, 234, 0.4);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.2em;
+    padding: 0;
+}
+
+.refresh-button:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+    transform: rotate(180deg);
+}
+
+.refresh-button:active {
+    transform: rotate(180deg) scale(0.95);
+}
+
+.refresh-button.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Debug Console */
+.debug-console {
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.debug-header {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 8px 12px;
+    font-weight: bold;
+    font-size: 0.9em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.clear-cache-btn {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 0.85em;
+    cursor: pointer;
+    color: #dc3545;
+    font-weight: normal;
+    transition: all 0.2s ease;
+}
+
+.clear-cache-btn:hover {
+    background: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.6);
+}
+
+.debug-output {
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+}
+
+.debug-output .debug-line {
+    margin-bottom: 4px;
+}
+
+.debug-output .debug-success {
+    color: #28a745;
+}
+
+.debug-output .debug-error {
+    color: #dc3545;
+}
+
+.debug-output .debug-info {
+    color: #667eea;
+}
+
+.debug-output .debug-warning {
+    color: #ffc107;
+}
+
+body.dark-mode .debug-console {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .debug-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .debug-output .debug-success {
+    color: #4caf50;
+}
+
+body.dark-mode .debug-output .debug-error {
+    color: #f44336;
+}
+
+body.dark-mode .debug-output .debug-info {
+    color: #90caf9;
+}
+
+body.dark-mode .debug-output .debug-warning {
+    color: #ffeb3b;
+}
+
+/* Fear/Greed Section (Top) */
+.fear-greed-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.fear-greed-section h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+/* Dual Fear & Greed Container */
+.fear-greed-dual-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.fear-greed-panel {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 16px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.fear-greed-panel:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.fear-greed-panel-title {
+    text-align: center;
+    font-size: 1.3em;
+    margin: 0 0 20px 0;
+    color: #667eea;
+    font-weight: 700;
+}
+
+.fear-greed-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.fear-greed-bar-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+.fear-greed-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.bar-label-left {
+    color: #ff4444;
+}
+
+.bar-label-right {
+    color: #00ff00;
+}
+
+.fear-greed-bar {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(90deg, #ff4444 0%, #ff8800 25%, #ffaa00 50%, #88cc00 75%, #00ff00 100%);
+    border-radius: 20px;
+    overflow: visible;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.fear-greed-bar-fill {
+    height: 100%;
+    background: transparent;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.fear-greed-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 50px;
+    background: #ffffff;
+    border: 3px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: left 0.5s ease;
+}
+
+.gauge-change {
+    font-size: 0.9em;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.gauge-change.positive {
+    color: #28a745;
+}
+
+.gauge-change.negative {
+    color: #dc3545;
+}
+
+.gauge-change.neutral {
+    color: #6c757d;
+}
+
+.index-value {
+    font-size: 4em;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #667eea;
+}
+
+.index-label {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.trend-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.trend-label {
+    font-size: 0.85em;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.index-bar {
+    width: 100%;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.index-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #00ff00 100%);
+    transition: width 0.5s ease;
+    border-radius: 15px;
+}
+
+/* Recession Indexes Section (Middle) */
+.recession-indexes {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.recession-indexes h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.indexes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.index-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: visible;
+    word-wrap: break-word;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.index-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.index-card h3 {
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    color: #555;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: 2.4em;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.index-card h3 a {
+    display: block;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.index-card h3 a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.index-card h3 a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.index-label-small {
+    font-size: 0.65em;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+.index-value-small {
+    font-size: 1.6em;
+    font-weight: bold;
+    margin: 2px 0 4px 0;
+    color: #667eea;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+    min-height: 1.2em;
+}
+
+.index-change {
+    font-size: 0.75em;
+    text-align: center;
+    margin: 2px 0 4px 0;
+    font-weight: 600;
+}
+
+.index-change.positive {
+    color: #28a745;
+}
+
+.index-change.negative {
+    color: #dc3545;
+}
+
+.index-change.neutral {
+    color: #6c757d;
+}
+
+.sparkline {
+    display: block;
+    margin: 2px auto 4px auto;
+    opacity: 0.7;
+}
+
+.index-status {
+    font-size: 0.85em;
+    margin-top: 4px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-word;
+}
+
+.status-good {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-bad {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-neutral {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* Conclusion Section (Bottom) */
+.conclusion-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.conclusion-section h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.conclusion-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.conclusion-wrapper {
+    min-width: 300px;
+    padding: 4px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #dc3545, #ffc107, #28a745);
+    transition: all 0.5s ease;
+}
+
+.conclusion-box {
+    width: 100%;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    background: white;
+    transition: all 0.5s ease;
+}
+
+.conclusion-score {
+    font-size: 3.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    transition: color 0.5s ease;
+    line-height: 1;
+}
+
+.conclusion-text {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    transition: color 0.5s ease;
+}
+
+.conclusion-scale-label {
+    font-size: 0.85em;
+    opacity: 0.8;
+    transition: color 0.5s ease;
+    line-height: 1.4;
+    margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .stock-indices-sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 20px;
+        max-height: none;
+    }
+    
+    .stock-indices-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Help Icon and Tooltip Styles */
+.help-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75em;
+    font-weight: bold;
+    cursor: help;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.help-icon:hover {
+    background: #764ba2;
+    transform: scale(1.1);
+}
+
+.index-card h3 .help-icon,
+.stock-index-card h3 .help-icon {
+    font-size: 0.7em;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+}
+
+.fear-greed-section h2 .help-icon {
+    font-size: 0.6em;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+/* Tooltip Container */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    line-height: 1.5;
+    max-width: 300px;
+    min-width: 200px;
+    width: max-content;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: left;
+    overflow-wrap: break-word;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.95);
+}
+
+/* Override arrow for index cards (tooltip below) */
+.index-card .tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.95);
+}
+
+.tooltip.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 1em;
+    display: block;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.tooltip-description {
+    color: #e0e0e0;
+    font-size: 0.9em;
+    display: block;
+    word-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+/* Position tooltips for index cards - use better positioning */
+.index-card .tooltip-container {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.index-card .tooltip {
+    position: absolute;
+    top: calc(100% + 12px);
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 280px;
+    min-width: 220px;
+    white-space: normal;
+    z-index: 10001;
+}
+
+.index-card .tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.95);
+    border-top: none;
+    top: auto;
+}
+
+/* Ensure tooltips don't get clipped */
+.indexes-grid {
+    overflow: visible;
+}
+
+/* Position tooltips for sidebar items */
+.stock-index-card .tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    transform: translateX(0);
+    max-width: 250px;
+    min-width: 200px;
+}
+
+.stock-index-card .tooltip::after {
+    left: 20px;
+    transform: translateX(0);
+}
+
+/* Position tooltip for Fear & Greed section */
+.fear-greed-section h2 .tooltip-container {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.fear-greed-section h2 .tooltip {
+    position: absolute;
+    top: calc(100% + 12px);
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 320px;
+    min-width: 250px;
+    z-index: 10001;
+}
+
+.fear-greed-section h2 .tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.95);
+    border-top: none;
+    top: auto;
+}
+
+.fear-greed-section h2 .tooltip::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #e0e0e0;
+}
+
+body.dark-mode .fear-greed-section,
+body.dark-mode .recession-indexes,
+body.dark-mode .stock-indices-sidebar {
+    background: #1e1e2e;
+    border-color: #2a2a3e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .conclusion-section {
+    background: transparent;
+    box-shadow: none;
+}
+
+body.dark-mode .conclusion-section {
+    background: transparent;
+}
+
+body.dark-mode .conclusion-wrapper {
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.3), rgba(0, 255, 0, 0.3));
+    border-color: #2a2a3e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .index-card {
+    background: #252538;
+    border-color: #3a3a4e;
+    color: #e0e0e0;
+}
+
+body.dark-mode .index-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    border-color: #4a4a5e;
+}
+
+body.dark-mode .index-card h3 a {
+    color: #8b9aff;
+}
+
+body.dark-mode .index-card h3 a:hover {
+    color: #a5b3ff;
+}
+
+body.dark-mode .index-value-small {
+    color: #8b9aff;
+}
+
+body.dark-mode .index-label-small {
+    color: #b0b0b0;
+}
+
+body.dark-mode .stock-index-card {
+    background: #252538;
+    border-color: #3a3a3e;
+}
+
+body.dark-mode .stock-index-card:hover {
+    border-color: #4a4a4e;
+}
+
+body.dark-mode .stock-price {
+    color: #8b9aff;
+}
+
+body.dark-mode .stock-region {
+    color: #b0b0b0;
+}
+
+body.dark-mode .stock-label-small {
+    color: #b0b0b0;
+}
+
+body.dark-mode .stock-indices-sidebar h2 {
+    color: #e0e0e0;
+    border-bottom-color: #3a3a4e;
+}
+
+body.dark-mode .stock-index-card h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .fear-greed-section h2,
+body.dark-mode .recession-indexes h2,
+body.dark-mode .conclusion-section h2,
+body.dark-mode .conclusion-box h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .index-value {
+    color: #8b9aff;
+}
+
+body.dark-mode .index-label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .fear-greed-bar {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .fear-greed-marker {
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+body.dark-mode .bar-label-left,
+body.dark-mode .bar-label-right {
+    color: #e0e0e0;
+}
+
+body.dark-mode .trend-label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .last-updated {
+    color: #b0b0b0;
+}
+
+body.dark-mode .conclusion-text {
+    color: #e0e0e0;
+}
+
+body.dark-mode .conclusion-scale-label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .index-status {
+    color: #e0e0e0;
+}
+
+body.dark-mode .status-good {
+    background: rgba(40, 167, 69, 0.3);
+    color: #6fcf97;
+    border: 1px solid rgba(40, 167, 69, 0.5);
+}
+
+body.dark-mode .status-warning {
+    background: rgba(255, 193, 7, 0.3);
+    color: #ffd54f;
+    border: 1px solid rgba(255, 193, 7, 0.6);
+    font-weight: 600;
+}
+
+body.dark-mode .status-bad {
+    background: rgba(220, 53, 69, 0.3);
+    color: #ff6b7a;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+body.dark-mode .status-neutral {
+    background: rgba(108, 117, 125, 0.3);
+    color: #adb5bd;
+    border: 1px solid rgba(108, 117, 125, 0.5);
+}
+
+body.dark-mode .index-bar {
+    background: #2a2a3e;
+}
+
+body.dark-mode .index-bar-fill {
+    background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #00ff00 100%);
+}
+
+body.dark-mode .conclusion-wrapper {
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.3), rgba(0, 255, 0, 0.3));
+    border-color: #2a2a3e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .conclusion-box {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+
+body.dark-mode .tooltip {
+    background: rgba(20, 20, 30, 0.98);
+    color: #e0e0e0;
+}
+
+body.dark-mode .tooltip::after {
+    border-top-color: rgba(20, 20, 30, 0.98);
+    border-bottom-color: rgba(20, 20, 30, 0.98);
+}
+
+body.dark-mode .index-card .tooltip::after {
+    border-bottom-color: rgba(20, 20, 30, 0.98);
+}
+
+body.dark-mode .fear-greed-section h2 .tooltip::after {
+    border-bottom-color: rgba(20, 20, 30, 0.98);
+}
+
+body.dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+body.dark-mode .refresh-button {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: #e0e0e0;
+}
+
+body.dark-mode .refresh-button:hover {
+    background: rgba(102, 126, 234, 0.4);
+    border-color: rgba(102, 126, 234, 0.7);
+}
+
+body.dark-mode .clear-cache-btn {
+    background: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.5);
+    color: #ff6b7a;
+}
+
+body.dark-mode .clear-cache-btn:hover {
+    background: rgba(220, 53, 69, 0.4);
+    border-color: rgba(220, 53, 69, 0.7);
+}
+
+body.dark-mode .debug-console {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .debug-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .fear-greed-panel {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .fear-greed-panel:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .fear-greed-panel-title {
+    color: #8b9bea;
+}
+
+/* Chart Modal */
+.chart-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.chart-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 1000px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.chart-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 30px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.chart-modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #2c3e50;
+}
+
+.chart-modal-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.chart-timeframe-select {
+    padding: 8px 16px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    color: #667eea;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chart-timeframe-select:hover {
+    background: #667eea;
+    color: white;
+}
+
+.chart-timeframe-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.chart-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 2em;
+    color: #666;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.chart-modal-close:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+.chart-modal-body {
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.chart-modal-body canvas {
+    max-height: 400px;
+    margin-bottom: 30px;
+}
+
+.chart-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.chart-stat {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+}
+
+.chart-stat-label {
+    display: block;
+    font-size: 0.85em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.chart-stat-value {
+    display: block;
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+/* Dark mode for modal */
+body.dark-mode .chart-modal-content {
+    background: #1e1e1e;
+}
+
+body.dark-mode .chart-modal-header {
+    border-bottom-color: #333;
+}
+
+body.dark-mode .chart-modal-header h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .chart-timeframe-select {
+    background: #2a2a2a;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+body.dark-mode .chart-timeframe-select:hover {
+    background: #667eea;
+    color: white;
+}
+
+body.dark-mode .chart-modal-close {
+    color: #999;
+}
+
+body.dark-mode .chart-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+/* Click indicator for cards */
+.index-card, .stock-index-card, .fear-greed-section {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.index-card:hover, .stock-index-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fear-greed-section:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .indexes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .index-value {
+        font-size: 3em;
+    }
+    
+    .gauge-value-display .index-value {
+        font-size: 2.8em;
+    }
+    
+    .gauge-value-display .index-label {
+        font-size: 1.1em;
+    }
+    
+    .fear-greed-gauge-container {
+        max-width: 260px;
+    }
+    
+    .fear-greed-gauge {
+        max-width: 260px;
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .stock-indices-sidebar {
+        grid-template-columns: 1fr;
+    }
+    
+    .tooltip {
+        max-width: 240px;
+        font-size: 0.8em;
+    }
+    
+    .theme-toggle-container {
+        position: static;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .chart-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .chart-modal-header {
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .chart-modal-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .chart-modal-body {
+        padding: 20px;
+    }
+    
+    .chart-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .fear-greed-dual-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .fear-greed-panel {
+        padding: 20px;
+    }
+    
+    .header-controls {
+        position: static;
+        margin-top: 20px;
+        justify-content: center;
+    }
+    
+    .export-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1em;
+    }
+}
+

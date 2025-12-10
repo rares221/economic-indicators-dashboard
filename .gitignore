@@ -1,0 +1,26 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+
+# Temporary Files
+*.tmp
+.cache/
+
+# API Keys (if you add them)
+config.local.js
+.env
+.env.local
+
+# Personal notes
+notes.txt
+TODO.txt

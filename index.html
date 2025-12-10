@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recession Index Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Economic Indicators Dashboard</h1>
+            <div class="header-controls">
+                <div class="export-buttons">
+                    <button id="export-png" class="export-btn" title="Export as PNG">
+                        <span>📸</span>
+                    </button>
+                    <button id="export-csv" class="export-btn" title="Export as CSV">
+                        <span>📊</span>
+                    </button>
+                    <button id="share-url" class="export-btn" title="Share Dashboard">
+                        <span>🔗</span>
+                    </button>
+                </div>
+                <div class="theme-toggle-container">
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Left Sidebar: Stock Indices -->
+            <aside class="stock-indices-sidebar">
+                <h2>Major Indices</h2>
+                <div class="last-updated" id="stock-indices-updated">--</div>
+                <div class="stock-indices-grid">
+                    <div class="stock-index-card" id="sp500-card">
+                        <h3>S&P 500 <span class="help-icon" data-tooltip="sp500">?</span></h3>
+                        <div class="stock-region">US</div>
+                        <div class="stock-price" id="sp500-price">--</div>
+                        <canvas id="sp500-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="sp500-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="sp500-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="nasdaq-card">
+                        <h3>NASDAQ <span class="help-icon" data-tooltip="nasdaq">?</span></h3>
+                        <div class="stock-region">US</div>
+                        <div class="stock-price" id="nasdaq-price">--</div>
+                        <canvas id="nasdaq-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="nasdaq-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="nasdaq-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="ftse100-card">
+                        <h3>FTSE 100 <span class="help-icon" data-tooltip="ftse100">?</span></h3>
+                        <div class="stock-region">UK</div>
+                        <div class="stock-price" id="ftse100-price">--</div>
+                        <canvas id="ftse100-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="ftse100-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="ftse100-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="dax-card">
+                        <h3>DAX <span class="help-icon" data-tooltip="dax">?</span></h3>
+                        <div class="stock-region">Germany</div>
+                        <div class="stock-price" id="dax-price">--</div>
+                        <canvas id="dax-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="dax-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="dax-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="stoxx600-card">
+                        <h3>STOXX 600 <span class="help-icon" data-tooltip="stoxx600">?</span></h3>
+                        <div class="stock-region">Europe</div>
+                        <div class="stock-price" id="stoxx600-price">--</div>
+                        <canvas id="stoxx600-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="stoxx600-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="stoxx600-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="nikkei-card">
+                        <h3>Nikkei 225 <span class="help-icon" data-tooltip="nikkei">?</span></h3>
+                        <div class="stock-region">Japan</div>
+                        <div class="stock-price" id="nikkei-price">--</div>
+                        <canvas id="nikkei-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="nikkei-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="nikkei-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="shanghai-card">
+                        <h3>Shanghai Composite <span class="help-icon" data-tooltip="shanghai">?</span></h3>
+                        <div class="stock-region">China</div>
+                        <div class="stock-price" id="shanghai-price">--</div>
+                        <canvas id="shanghai-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="shanghai-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="shanghai-change-percent">--</div>
+                    </div>
+                    <div class="stock-index-card" id="hangsen-card">
+                        <h3>Hang Seng <span class="help-icon" data-tooltip="hangsen">?</span></h3>
+                        <div class="stock-region">Hong Kong</div>
+                        <div class="stock-price" id="hangsen-price">--</div>
+                        <canvas id="hangsen-sparkline" class="sparkline" width="100" height="18"></canvas>
+                        <div class="stock-label-small">Daily Change:</div>
+                        <div class="stock-change" id="hangsen-change">--</div>
+                        <div class="stock-label-small">Daily %:</div>
+                        <div class="stock-change-percent" id="hangsen-change-percent">--</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+        <!-- Fear/Greed Index Section (Top) -->
+        <section class="fear-greed-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Fear & Greed Indexes <span class="help-icon" data-tooltip="fear-greed">?</span></h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="toggle-debug" class="refresh-button" title="Toggle Debug Console">🐛</button>
+                    <button id="refresh-fear-greed" class="refresh-button" title="Refresh Fear & Greed Index">🔄</button>
+                </div>
+            </div>
+            <div class="last-updated" id="fear-greed-updated">--</div>
+            <div id="debug-console" class="debug-console" style="display: none;">
+                <div class="debug-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Debug Console - Click 🐛 to toggle</span>
+                    <button id="clear-cache-btn" class="clear-cache-btn" title="Clear cached Fear & Greed value">Clear Cache</button>
+                </div>
+                <div id="debug-output" class="debug-output">
+                    <div class="debug-line debug-info">Debug console initialized. Waiting for data fetch...</div>
+                    <div class="debug-line debug-info">Click the 🔄 button to manually refresh the Fear & Greed Index.</div>
+                    <div class="debug-line debug-info">Note: CNN's API may block cross-origin requests. Check console for CORS errors.</div>
+                </div>
+            </div>
+            <div class="fear-greed-dual-container">
+                <!-- Stock Market Fear & Greed -->
+                <div class="fear-greed-panel" id="stock-fear-greed-panel">
+                    <h3 class="fear-greed-panel-title">📈 Stock Market</h3>
+                    <div class="fear-greed-content">
+                        <div class="index-value" id="fear-greed-value">--</div>
+                        <div class="index-label" id="fear-greed-label">Loading...</div>
+                        <div class="gauge-change" id="fear-greed-change">--</div>
+                        
+                        <div class="fear-greed-bar-container">
+                            <div class="fear-greed-bar-labels">
+                                <span class="bar-label-left">Extreme Fear</span>
+                                <span class="bar-label-right">Extreme Greed</span>
+                            </div>
+                            <div class="fear-greed-bar">
+                                <div class="fear-greed-bar-fill" id="fear-greed-bar"></div>
+                                <div class="fear-greed-marker" id="fear-greed-marker"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="trend-section">
+                            <div class="trend-label">30-Day Trend</div>
+                            <canvas id="fear-greed-sparkline" class="sparkline" width="200" height="30"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Crypto Fear & Greed -->
+                <div class="fear-greed-panel" id="crypto-fear-greed-panel">
+                    <h3 class="fear-greed-panel-title">₿ Crypto Market</h3>
+                    <div class="fear-greed-content">
+                        <div class="index-value" id="crypto-fear-greed-value">--</div>
+                        <div class="index-label" id="crypto-fear-greed-label">Loading...</div>
+                        <div class="gauge-change" id="crypto-fear-greed-change">--</div>
+                        
+                        <div class="fear-greed-bar-container">
+                            <div class="fear-greed-bar-labels">
+                                <span class="bar-label-left">Extreme Fear</span>
+                                <span class="bar-label-right">Extreme Greed</span>
+                            </div>
+                            <div class="fear-greed-bar">
+                                <div class="fear-greed-bar-fill" id="crypto-fear-greed-bar"></div>
+                                <div class="fear-greed-marker" id="crypto-fear-greed-marker"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="trend-section">
+                            <div class="trend-label">30-Day Trend</div>
+                            <canvas id="crypto-fear-greed-sparkline" class="sparkline" width="200" height="30"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recession Indexes Section (Middle) -->
+        <section class="recession-indexes">
+            <h2>Unofficial Recession Indexes</h2>
+            <div class="last-updated" id="recession-indexes-updated">--</div>
+            <div class="indexes-grid">
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Sahm_rule" target="_blank" rel="noopener noreferrer">Sahm Rule</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="sahm-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="sahm-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="sahm-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="sahm-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Yield_curve" target="_blank" rel="noopener noreferrer">Yield Curve</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="yield-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="yield-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="yield-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="yield-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Unemployment" target="_blank" rel="noopener noreferrer">Unemployment Rate</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="unemployment-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="unemployment-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="unemployment-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="unemployment-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Gross_domestic_product" target="_blank" rel="noopener noreferrer">GDP Growth</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="gdp-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="gdp-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="gdp-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="gdp-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Lipstick_index" target="_blank" rel="noopener noreferrer">Lipstick Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="lipstick-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="lipstick-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="lipstick-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="lipstick-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Recession_index" target="_blank" rel="noopener noreferrer">R-Word Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="rword-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="rword-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="rword-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="rword-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Stripper_index" target="_blank" rel="noopener noreferrer">Stripper Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="stripper-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="stripper-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="stripper-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="stripper-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Vibecession" target="_blank" rel="noopener noreferrer">Vibecession</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="vibecession-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="vibecession-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="vibecession-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="vibecession-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Aruoba-Diebold-Scotti_Index" target="_blank" rel="noopener noreferrer">ADS Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="ads-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="ads-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="ads-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="ads-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Manheim_Used_Vehicle_Value_Index" target="_blank" rel="noopener noreferrer">Used Car Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="usedcar-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="usedcar-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="usedcar-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="usedcar-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/LEGO" target="_blank" rel="noopener noreferrer">Lego Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="lego-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="lego-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="lego-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="lego-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Frozen_food" target="_blank" rel="noopener noreferrer">Frozen Pizza Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="pizza-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="pizza-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="pizza-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="pizza-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Men%27s_underwear_index" target="_blank" rel="noopener noreferrer">Men's Underwear Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="underwear-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="underwear-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="underwear-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="underwear-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Big_Mac_Index" target="_blank" rel="noopener noreferrer">Big Mac Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="bigmac-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="bigmac-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="bigmac-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="bigmac-status">--</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion Section (Bottom) -->
+        <section class="conclusion-section">
+            <h2>Overall Assessment</h2>
+            <div class="last-updated" id="conclusion-updated">--</div>
+            <div class="conclusion-content">
+                <div class="conclusion-wrapper" id="conclusion-wrapper">
+                    <div class="conclusion-box" id="conclusion-box">
+                        <div class="conclusion-score" id="conclusion-score">--</div>
+                        <div class="conclusion-text" id="conclusion-text">Calculating...</div>
+                        <div class="conclusion-scale-label" id="conclusion-scale-label">Scale: 0-100 (0 = Severe, 50 = Stable, 100 = Exceptional)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Modal -->
+    <div id="chart-modal" class="chart-modal" style="display: none;">
+        <div class="chart-modal-overlay"></div>
+        <div class="chart-modal-content">
+            <div class="chart-modal-header">
+                <h2 id="chart-modal-title">Historical Data</h2>
+                <div class="chart-modal-controls">
+                    <select id="chart-timeframe" class="chart-timeframe-select">
+                        <option value="7">7 Days</option>
+                        <option value="30" selected>30 Days</option>
+                        <option value="90">90 Days</option>
+                        <option value="365">1 Year</option>
+                    </select>
+                    <button id="chart-modal-close" class="chart-modal-close" aria-label="Close modal">✕</button>
+                </div>
+            </div>
+            <div class="chart-modal-body">
+                <canvas id="detail-chart"></canvas>
+                <div class="chart-stats">
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Current:</span>
+                        <span class="chart-stat-value" id="chart-stat-current">--</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Average:</span>
+                        <span class="chart-stat-value" id="chart-stat-avg">--</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">High:</span>
+                        <span class="chart-stat-value" id="chart-stat-high">--</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Low:</span>
+                        <span class="chart-stat-value" id="chart-stat-low">--</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Change:</span>
+                        <span class="chart-stat-value" id="chart-stat-change">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=6"></script>
+</body>
+</html>
+
