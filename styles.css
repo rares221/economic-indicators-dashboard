@@ -49,6 +49,75 @@ body {
     padding-bottom: 10px;
 }
 
+/* Market Status Indicator */
+.market-status-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.market-status-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.market-status-item:last-child {
+    margin-bottom: 0;
+}
+
+.market-status-item:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateX(4px);
+}
+
+.market-status-icon {
+    font-size: 1.5em;
+    line-height: 1;
+    min-width: 24px;
+    text-align: center;
+}
+
+.market-status-info {
+    flex: 1;
+}
+
+.market-status-name {
+    font-weight: 600;
+    font-size: 0.95em;
+    color: #2c3e50;
+    margin-bottom: 2px;
+}
+
+.market-status-time {
+    font-size: 0.85em;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Market status states */
+.market-status-item.open .market-status-time {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.market-status-item.closed .market-status-time {
+    color: #ef4444;
+}
+
+.market-status-item.pre-market .market-status-time,
+.market-status-item.after-hours .market-status-time {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
 .last-updated {
     text-align: center;
     font-size: 0.75em;
@@ -974,6 +1043,27 @@ body.dark-mode .stock-indices-sidebar {
     background: #1e1e2e;
     border-color: #2a2a3e;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .market-status-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .market-status-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .market-status-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .market-status-name {
+    color: #e0e0e0;
+}
+
+body.dark-mode .market-status-time {
+    color: #9ca3af;
 }
 
 body.dark-mode .conclusion-section {

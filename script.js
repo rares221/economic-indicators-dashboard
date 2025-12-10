@@ -2,6 +2,30 @@
 const FRED_API_KEY = 'demo'; // Replace with your FRED API key from https://fred.stlouisfed.org/docs/api/api_key.html
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
+// Market Hours Configuration (in UTC)
+const MARKET_HOURS = {
+    US: {
+        name: 'US Markets',
+        timezone: 'America/New_York',
+        preMarket: { start: 4, end: 9.5 },      // 4:00 AM - 9:30 AM ET
+        regular: { start: 9.5, end: 16 },       // 9:30 AM - 4:00 PM ET
+        afterHours: { start: 16, end: 20 },     // 4:00 PM - 8:00 PM ET
+        weekdays: [1, 2, 3, 4, 5]               // Monday-Friday
+    },
+    EU: {
+        name: 'European Markets',
+        timezone: 'Europe/London',
+        regular: { start: 8, end: 16.5 },       // 8:00 AM - 4:30 PM GMT
+        weekdays: [1, 2, 3, 4, 5]
+    },
+    ASIA: {
+        name: 'Asian Markets',
+        timezone: 'Asia/Tokyo',
+        regular: { start: 9, end: 15 },         // 9:00 AM - 3:00 PM JST
+        weekdays: [1, 2, 3, 4, 5]
+    }
+};
+
 // CNN Fear & Greed Index (Stock Market)
 // CNN's publicly accessible internal API endpoint (no API key required)
 // This endpoint returns JSON data with the current Fear & Greed Index
@@ -1734,6 +1758,135 @@ async function clearCacheAndRefresh() {
 }
 
 // ============================================
+// MARKET STATUS INDICATOR
+// ============================================
+
+// Get current time in a specific timezone
+function getTimeInTimezone(timezone) {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+}
+
+// Calculate market status
+function getMarketStatus(marketConfig) {
+    const now = getTimeInTimezone(marketConfig.timezone);
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const hours = now.getHours() + now.getMinutes() / 60;
+    
+    // Check if it's a weekday
+    if (!marketConfig.weekdays.includes(dayOfWeek)) {
+        const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+        return {
+            status: 'closed',
+            icon: '🔴',
+            message: `CLOSED - Opens Monday`,
+            className: 'closed'
+        };
+    }
+    
+    // Check pre-market (US only)
+    if (marketConfig.preMarket && hours >= marketConfig.preMarket.start && hours < marketConfig.preMarket.end) {
+        const minutesUntilOpen = Math.floor((marketConfig.regular.start - hours) * 60);
+        const hoursUntil = Math.floor(minutesUntilOpen / 60);
+        const minsUntil = minutesUntilOpen % 60;
+        return {
+            status: 'pre-market',
+            icon: '🟡',
+            message: `PRE-MARKET - Opens in ${hoursUntil}h ${minsUntil}m`,
+            className: 'pre-market'
+        };
+    }
+    
+    // Check regular hours
+    if (hours >= marketConfig.regular.start && hours < marketConfig.regular.end) {
+        const minutesUntilClose = Math.floor((marketConfig.regular.end - hours) * 60);
+        const hoursUntil = Math.floor(minutesUntilClose / 60);
+        const minsUntil = minutesUntilClose % 60;
+        return {
+            status: 'open',
+            icon: '🟢',
+            message: `OPEN - Closes in ${hoursUntil}h ${minsUntil}m`,
+            className: 'open'
+        };
+    }
+    
+    // Check after-hours (US only)
+    if (marketConfig.afterHours && hours >= marketConfig.afterHours.start && hours < marketConfig.afterHours.end) {
+        const minutesUntilClose = Math.floor((marketConfig.afterHours.end - hours) * 60);
+        const hoursUntil = Math.floor(minutesUntilClose / 60);
+        const minsUntil = minutesUntilClose % 60;
+        return {
+            status: 'after-hours',
+            icon: '🟡',
+            message: `AFTER-HOURS - Closes in ${hoursUntil}h ${minsUntil}m`,
+            className: 'after-hours'
+        };
+    }
+    
+    // Market is closed, calculate time until next open
+    let nextOpen = marketConfig.regular.start;
+    let daysUntil = 0;
+    
+    if (hours >= (marketConfig.afterHours?.end || marketConfig.regular.end)) {
+        // After market close, opens tomorrow (or Monday)
+        if (dayOfWeek === 5) { // Friday
+            daysUntil = 3; // Opens Monday
+        } else {
+            daysUntil = 1; // Opens tomorrow
+        }
+    }
+    
+    const hoursUntilOpen = (24 * daysUntil) + (nextOpen - hours);
+    const hours24 = Math.floor(hoursUntilOpen);
+    const mins = Math.floor((hoursUntilOpen % 1) * 60);
+    
+    let message = 'CLOSED';
+    if (daysUntil === 0) {
+        message += ` - Opens in ${hours24}h ${mins}m`;
+    } else if (daysUntil === 1) {
+        message += ` - Opens tomorrow`;
+    } else {
+        message += ` - Opens Monday`;
+    }
+    
+    return {
+        status: 'closed',
+        icon: '🔴',
+        message: message,
+        className: 'closed'
+    };
+}
+
+// Update market status display
+function updateMarketStatus() {
+    // Update US Markets
+    const usStatus = getMarketStatus(MARKET_HOURS.US);
+    const usElement = document.getElementById('us-market-status');
+    if (usElement) {
+        usElement.className = `market-status-item ${usStatus.className}`;
+        usElement.querySelector('.market-status-icon').textContent = usStatus.icon;
+        usElement.querySelector('.market-status-time').textContent = usStatus.message;
+    }
+    
+    // Update European Markets
+    const euStatus = getMarketStatus(MARKET_HOURS.EU);
+    const euElement = document.getElementById('eu-market-status');
+    if (euElement) {
+        euElement.className = `market-status-item ${euStatus.className}`;
+        euElement.querySelector('.market-status-icon').textContent = euStatus.icon;
+        euElement.querySelector('.market-status-time').textContent = euStatus.message;
+    }
+    
+    // Update Asian Markets
+    const asiaStatus = getMarketStatus(MARKET_HOURS.ASIA);
+    const asiaElement = document.getElementById('asia-market-status');
+    if (asiaElement) {
+        asiaElement.className = `market-status-item ${asiaStatus.className}`;
+        asiaElement.querySelector('.market-status-icon').textContent = asiaStatus.icon;
+        asiaElement.querySelector('.market-status-time').textContent = asiaStatus.message;
+    }
+}
+
+// ============================================
 // EXPORT & SHARE FUNCTIONALITY
 // ============================================
 
@@ -2172,6 +2325,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initDarkMode();
     initDashboard();
     initTooltips();
+    
+    // Initialize market status
+    updateMarketStatus();
+    // Update market status every minute
+    setInterval(updateMarketStatus, 60000);
     
     // Add refresh button handler
     const refreshBtn = document.getElementById('refresh-fear-greed');
