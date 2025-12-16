@@ -861,69 +861,6 @@ body.dark-mode .debug-output .debug-warning {
     color: #495057;
 }
 
-/* Conclusion Section (Bottom) */
-.conclusion-section {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.conclusion-section h2 {
-    text-align: center;
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 1.8em;
-}
-
-.conclusion-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.conclusion-wrapper {
-    min-width: 300px;
-    padding: 4px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #dc3545, #ffc107, #28a745);
-    transition: all 0.5s ease;
-}
-
-.conclusion-box {
-    width: 100%;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    background: white;
-    transition: all 0.5s ease;
-}
-
-.conclusion-score {
-    font-size: 3.5em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    transition: color 0.5s ease;
-    line-height: 1;
-}
-
-.conclusion-text {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    transition: color 0.5s ease;
-}
-
-.conclusion-scale-label {
-    font-size: 0.85em;
-    opacity: 0.8;
-    transition: color 0.5s ease;
-    line-height: 1.4;
-    margin-top: 10px;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
     .main-layout {
@@ -1175,21 +1112,6 @@ body.dark-mode .market-status-time {
     color: #9ca3af;
 }
 
-body.dark-mode .conclusion-section {
-    background: transparent;
-    box-shadow: none;
-}
-
-body.dark-mode .conclusion-section {
-    background: transparent;
-}
-
-body.dark-mode .conclusion-wrapper {
-    background: linear-gradient(135deg, rgba(255, 68, 68, 0.3), rgba(0, 255, 0, 0.3));
-    border-color: #2a2a3e;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
 body.dark-mode .index-card {
     background: #252538;
     border-color: #3a3a4e;
@@ -1250,8 +1172,7 @@ body.dark-mode .stock-index-card h3 {
 body.dark-mode .fear-greed-section h2,
 body.dark-mode .vix-section h2,
 body.dark-mode .recession-indexes h2,
-body.dark-mode .conclusion-section h2,
-body.dark-mode .conclusion-box h2 {
+body.dark-mode .recession-probability-section h2 {
     color: #e0e0e0;
 }
 
@@ -1285,13 +1206,6 @@ body.dark-mode .last-updated {
     color: #b0b0b0;
 }
 
-body.dark-mode .conclusion-text {
-    color: #e0e0e0;
-}
-
-body.dark-mode .conclusion-scale-label {
-    color: #b0b0b0;
-}
 
 body.dark-mode .index-status {
     color: #e0e0e0;
@@ -1330,15 +1244,6 @@ body.dark-mode .index-bar-fill {
     background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #00ff00 100%);
 }
 
-body.dark-mode .conclusion-wrapper {
-    background: linear-gradient(135deg, rgba(255, 68, 68, 0.3), rgba(0, 255, 0, 0.3));
-    border-color: #2a2a3e;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-mode .conclusion-box {
-    background: rgba(30, 30, 46, 0.95) !important;
-}
 
 body.dark-mode .tooltip {
     background: rgba(20, 20, 30, 0.98);
@@ -1632,6 +1537,453 @@ body.dark-mode .chart-modal-close:hover {
 
 .fear-greed-section:hover {
     transform: translateY(-2px);
+}
+
+/* Recession Probability Calculator Styles */
+.recession-probability-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.recession-probability-section h2 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.probability-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.probability-main {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.probability-value-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.probability-value {
+    font-size: 4.5em;
+    font-weight: bold;
+    color: #667eea;
+    margin: 10px 0;
+    line-height: 1;
+}
+
+.probability-label {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 15px 0;
+}
+
+.probability-confidence {
+    font-size: 0.9em;
+    color: #666;
+    margin: 10px 0;
+}
+
+.probability-trend {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.probability-trend.trend-up {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.probability-trend.trend-down {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.probability-trend.trend-stable {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+.probability-meter-container {
+    margin-top: 20px;
+}
+
+.probability-meter-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #666;
+}
+
+.meter-label-left {
+    color: #28a745;
+}
+
+.meter-label-center {
+    color: #ffc107;
+}
+
+.meter-label-right {
+    color: #dc3545;
+}
+
+.probability-meter {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(to right, 
+        #28a745 0%, 
+        #90ee90 20%, 
+        #ffc107 40%, 
+        #ff9800 60%, 
+        #ff5722 80%, 
+        #dc3545 100%);
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    overflow: visible;
+}
+
+.probability-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    background: white;
+    border: 4px solid #333;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.probability-scale-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.75em;
+    color: #888;
+    font-weight: 600;
+}
+
+.probability-breakdown {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.probability-breakdown h3 {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.contributors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contributor-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.contributor-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.contributor-icon {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.contributor-icon.status-bad {
+    color: #dc3545;
+}
+
+.contributor-icon.status-warning {
+    color: #ffc107;
+}
+
+.contributor-icon.status-good {
+    color: #28a745;
+}
+
+.contributor-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.contributor-badge {
+    font-size: 0.7em;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.contributor-badge.official {
+    background: rgba(102, 126, 234, 0.2);
+    color: #667eea;
+}
+
+.contributor-badge.unofficial {
+    background: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+}
+
+.contributor-bar-container {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.contributor-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.contributor-bar.status-bad {
+    background: linear-gradient(90deg, #dc3545, #ff6b7a);
+}
+
+.contributor-bar.status-warning {
+    background: linear-gradient(90deg, #ffc107, #ffd54f);
+}
+
+.contributor-bar.status-good {
+    background: linear-gradient(90deg, #28a745, #6fcf97);
+}
+
+.contributor-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75em;
+    color: #666;
+    margin-top: 6px;
+}
+
+.probability-explanation {
+    margin-top: 25px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+}
+
+.probability-explanation p {
+    margin: 0;
+    line-height: 1.6;
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* Dark mode for probability calculator */
+body.dark-mode .recession-probability-section {
+    background: #1e1e2e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .recession-probability-section h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .probability-main {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .probability-value {
+    color: #8b9aff;
+}
+
+body.dark-mode .probability-label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .probability-confidence {
+    color: #b0b0b0;
+}
+
+body.dark-mode .probability-breakdown {
+    background: #252538;
+}
+
+body.dark-mode .probability-breakdown h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .contributor-item {
+    background: #2a2a3e;
+    border-color: #3a3a4e;
+}
+
+body.dark-mode .contributor-name {
+    color: #e0e0e0;
+}
+
+body.dark-mode .contributor-bar-container {
+    background: #1a1a2e;
+}
+
+body.dark-mode .probability-explanation {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: #8b9aff;
+}
+
+body.dark-mode .probability-explanation p {
+    color: #b0b0b0;
+}
+
+body.dark-mode .probability-marker {
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .probability-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Skeleton Loader Styles */
+.skeleton {
+    background: linear-gradient(90deg, 
+        rgba(200, 200, 200, 0.2) 0%, 
+        rgba(200, 200, 200, 0.4) 50%, 
+        rgba(200, 200, 200, 0.2) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Different skeleton sizes for different content types */
+.skeleton-text {
+    height: 1em;
+    width: 100%;
+    margin: 4px 0;
+}
+
+.skeleton-text-short {
+    height: 1em;
+    width: 60%;
+    margin: 4px 0;
+}
+
+.skeleton-text-medium {
+    height: 1em;
+    width: 80%;
+    margin: 4px 0;
+}
+
+.skeleton-number {
+    height: 1.5em;
+    width: 80px;
+    margin: 4px auto;
+}
+
+.skeleton-number-large {
+    height: 3em;
+    width: 120px;
+    margin: 20px auto;
+}
+
+.skeleton-price {
+    height: 1.5em;
+    width: 100px;
+    margin: 0 auto;
+}
+
+.skeleton-change {
+    height: 0.85em;
+    width: 60px;
+    margin: 2px auto;
+}
+
+.skeleton-status {
+    height: 1.8em;
+    width: 80px;
+    margin: 4px auto;
+    border-radius: 5px;
+}
+
+.skeleton-sparkline {
+    height: 20px;
+    width: 120px;
+    margin: 2px auto 4px auto;
+    border-radius: 2px;
+}
+
+.skeleton-bar {
+    height: 40px;
+    width: 100%;
+    border-radius: 20px;
+    margin: 10px 0;
+}
+
+/* Dark mode skeleton styles */
+body.dark-mode .skeleton {
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.05) 0%, 
+        rgba(255, 255, 255, 0.15) 50%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+}
+
+/* Hide actual content when skeleton is showing */
+.loading .index-value-small,
+.loading .index-change,
+.loading .index-status,
+.loading .stock-price,
+.loading .stock-change,
+.loading .stock-change-percent,
+.loading .index-value,
+.loading .index-label,
+.loading .gauge-change {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 @media (max-width: 768px) {

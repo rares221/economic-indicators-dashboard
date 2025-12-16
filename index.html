@@ -35,7 +35,10 @@
         <div class="main-layout">
             <!-- Left Sidebar: Stock Indices -->
             <aside class="stock-indices-sidebar">
-                <h2>Major Indices</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h2 style="margin: 0;">Major Indices</h2>
+                    <button id="refresh-stock-indices" class="refresh-button" title="Refresh Stock Indices">🔄</button>
+                </div>
                 <div class="last-updated" id="stock-indices-updated">--</div>
                 
                 <!-- Market Status Indicator -->
@@ -67,82 +70,106 @@
                     <div class="stock-index-card" id="sp500-card">
                         <h3>S&P 500 <span class="help-icon" data-tooltip="sp500">?</span></h3>
                         <div class="stock-region">US</div>
-                        <div class="stock-price" id="sp500-price">--</div>
+                        <div class="skeleton skeleton-price" id="sp500-price-skeleton"></div>
+                        <div class="stock-price" id="sp500-price" style="display: none;">--</div>
                         <canvas id="sp500-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="sp500-change">--</div>
+                        <div class="skeleton skeleton-change" id="sp500-change-skeleton"></div>
+                        <div class="stock-change" id="sp500-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="sp500-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="sp500-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="sp500-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="nasdaq-card">
                         <h3>NASDAQ <span class="help-icon" data-tooltip="nasdaq">?</span></h3>
                         <div class="stock-region">US</div>
-                        <div class="stock-price" id="nasdaq-price">--</div>
+                        <div class="skeleton skeleton-price" id="nasdaq-price-skeleton"></div>
+                        <div class="stock-price" id="nasdaq-price" style="display: none;">--</div>
                         <canvas id="nasdaq-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="nasdaq-change">--</div>
+                        <div class="skeleton skeleton-change" id="nasdaq-change-skeleton"></div>
+                        <div class="stock-change" id="nasdaq-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="nasdaq-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="nasdaq-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="nasdaq-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="ftse100-card">
                         <h3>FTSE 100 <span class="help-icon" data-tooltip="ftse100">?</span></h3>
                         <div class="stock-region">UK</div>
-                        <div class="stock-price" id="ftse100-price">--</div>
+                        <div class="skeleton skeleton-price" id="ftse100-price-skeleton"></div>
+                        <div class="stock-price" id="ftse100-price" style="display: none;">--</div>
                         <canvas id="ftse100-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="ftse100-change">--</div>
+                        <div class="skeleton skeleton-change" id="ftse100-change-skeleton"></div>
+                        <div class="stock-change" id="ftse100-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="ftse100-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="ftse100-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="ftse100-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="dax-card">
                         <h3>DAX <span class="help-icon" data-tooltip="dax">?</span></h3>
                         <div class="stock-region">Germany</div>
-                        <div class="stock-price" id="dax-price">--</div>
+                        <div class="skeleton skeleton-price" id="dax-price-skeleton"></div>
+                        <div class="stock-price" id="dax-price" style="display: none;">--</div>
                         <canvas id="dax-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="dax-change">--</div>
+                        <div class="skeleton skeleton-change" id="dax-change-skeleton"></div>
+                        <div class="stock-change" id="dax-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="dax-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="dax-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="dax-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="stoxx600-card">
                         <h3>STOXX 600 <span class="help-icon" data-tooltip="stoxx600">?</span></h3>
                         <div class="stock-region">Europe</div>
-                        <div class="stock-price" id="stoxx600-price">--</div>
+                        <div class="skeleton skeleton-price" id="stoxx600-price-skeleton"></div>
+                        <div class="stock-price" id="stoxx600-price" style="display: none;">--</div>
                         <canvas id="stoxx600-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="stoxx600-change">--</div>
+                        <div class="skeleton skeleton-change" id="stoxx600-change-skeleton"></div>
+                        <div class="stock-change" id="stoxx600-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="stoxx600-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="stoxx600-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="stoxx600-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="nikkei-card">
                         <h3>Nikkei 225 <span class="help-icon" data-tooltip="nikkei">?</span></h3>
                         <div class="stock-region">Japan</div>
-                        <div class="stock-price" id="nikkei-price">--</div>
+                        <div class="skeleton skeleton-price" id="nikkei-price-skeleton"></div>
+                        <div class="stock-price" id="nikkei-price" style="display: none;">--</div>
                         <canvas id="nikkei-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="nikkei-change">--</div>
+                        <div class="skeleton skeleton-change" id="nikkei-change-skeleton"></div>
+                        <div class="stock-change" id="nikkei-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="nikkei-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="nikkei-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="nikkei-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="shanghai-card">
                         <h3>Shanghai Composite <span class="help-icon" data-tooltip="shanghai">?</span></h3>
                         <div class="stock-region">China</div>
-                        <div class="stock-price" id="shanghai-price">--</div>
+                        <div class="skeleton skeleton-price" id="shanghai-price-skeleton"></div>
+                        <div class="stock-price" id="shanghai-price" style="display: none;">--</div>
                         <canvas id="shanghai-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="shanghai-change">--</div>
+                        <div class="skeleton skeleton-change" id="shanghai-change-skeleton"></div>
+                        <div class="stock-change" id="shanghai-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="shanghai-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="shanghai-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="shanghai-change-percent" style="display: none;">--</div>
                     </div>
                     <div class="stock-index-card" id="hangsen-card">
                         <h3>Hang Seng <span class="help-icon" data-tooltip="hangsen">?</span></h3>
                         <div class="stock-region">Hong Kong</div>
-                        <div class="stock-price" id="hangsen-price">--</div>
+                        <div class="skeleton skeleton-price" id="hangsen-price-skeleton"></div>
+                        <div class="stock-price" id="hangsen-price" style="display: none;">--</div>
                         <canvas id="hangsen-sparkline" class="sparkline" width="100" height="18"></canvas>
                         <div class="stock-label-small">Daily Change:</div>
-                        <div class="stock-change" id="hangsen-change">--</div>
+                        <div class="skeleton skeleton-change" id="hangsen-change-skeleton"></div>
+                        <div class="stock-change" id="hangsen-change" style="display: none;">--</div>
                         <div class="stock-label-small">Daily %:</div>
-                        <div class="stock-change-percent" id="hangsen-change-percent">--</div>
+                        <div class="skeleton skeleton-change" id="hangsen-change-percent-skeleton"></div>
+                        <div class="stock-change-percent" id="hangsen-change-percent" style="display: none;">--</div>
                     </div>
                 </div>
             </aside>
@@ -175,9 +202,11 @@
                 <div class="fear-greed-panel" id="stock-fear-greed-panel">
                     <h3 class="fear-greed-panel-title">📈 Stock Market</h3>
                     <div class="fear-greed-content">
-                        <div class="index-value" id="fear-greed-value">--</div>
+                        <div class="skeleton skeleton-number-large" id="fear-greed-skeleton"></div>
+                        <div class="index-value" id="fear-greed-value" style="display: none;">--</div>
                         <div class="index-label" id="fear-greed-label">Loading...</div>
-                        <div class="gauge-change" id="fear-greed-change">--</div>
+                        <div class="skeleton skeleton-change" id="fear-greed-change-skeleton"></div>
+                        <div class="gauge-change" id="fear-greed-change" style="display: none;">--</div>
                         
                         <div class="fear-greed-bar-container">
                             <div class="fear-greed-bar-labels">
@@ -201,9 +230,11 @@
                 <div class="fear-greed-panel" id="crypto-fear-greed-panel">
                     <h3 class="fear-greed-panel-title">₿ Crypto Market</h3>
                     <div class="fear-greed-content">
-                        <div class="index-value" id="crypto-fear-greed-value">--</div>
+                        <div class="skeleton skeleton-number-large" id="crypto-fear-greed-skeleton"></div>
+                        <div class="index-value" id="crypto-fear-greed-value" style="display: none;">--</div>
                         <div class="index-label" id="crypto-fear-greed-label">Loading...</div>
-                        <div class="gauge-change" id="crypto-fear-greed-change">--</div>
+                        <div class="skeleton skeleton-change" id="crypto-fear-greed-change-skeleton"></div>
+                        <div class="gauge-change" id="crypto-fear-greed-change" style="display: none;">--</div>
                         
                         <div class="fear-greed-bar-container">
                             <div class="fear-greed-bar-labels">
@@ -235,9 +266,11 @@
             
             <div class="vix-panel">
                 <div class="vix-content">
-                    <div class="index-value" id="vix-value">--</div>
+                    <div class="skeleton skeleton-number-large" id="vix-skeleton"></div>
+                    <div class="index-value" id="vix-value" style="display: none;">--</div>
                     <div class="index-label" id="vix-label">Loading...</div>
-                    <div class="gauge-change" id="vix-change">--</div>
+                    <div class="skeleton skeleton-change" id="vix-change-skeleton"></div>
+                    <div class="gauge-change" id="vix-change" style="display: none;">--</div>
                     
                     <div class="vix-bar-container">
                         <div class="vix-bar-labels">
@@ -266,21 +299,78 @@
             </div>
         </section>
 
+        <!-- Recession Probability Calculator Section -->
+        <section class="recession-probability-section">
+            <h2> Recession Probability Calculator</h2>
+            <div class="last-updated" id="recession-probability-updated">--</div>
+            
+            <div class="probability-panel">
+                <div class="probability-main">
+                    <div class="probability-value-container">
+                        <div class="probability-value" id="recession-probability-value">--</div>
+                        <div class="probability-label" id="recession-probability-label">Calculating...</div>
+                        <div class="probability-confidence">
+                            Confidence Range: <span id="recession-probability-range">--</span>
+                        </div>
+                        <div class="probability-trend" id="recession-probability-trend">→ Stable</div>
+                    </div>
+                    
+                    <div class="probability-meter-container">
+                        <div class="probability-meter-labels">
+                            <span class="meter-label-left">Very Low</span>
+                            <span class="meter-label-center">Moderate</span>
+                            <span class="meter-label-right">Very High</span>
+                        </div>
+                        <div class="probability-meter" id="recession-probability-meter">
+                            <div class="probability-marker" id="recession-probability-marker"></div>
+                        </div>
+                        <div class="probability-scale-markers">
+                            <span class="scale-marker" style="left: 0%;">0%</span>
+                            <span class="scale-marker" style="left: 25%;">25%</span>
+                            <span class="scale-marker" style="left: 50%;">50%</span>
+                            <span class="scale-marker" style="left: 75%;">75%</span>
+                            <span class="scale-marker" style="left: 100%;">100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="probability-breakdown">
+                    <h3>Top Contributing Indicators</h3>
+                    <div id="recession-contributors-breakdown" class="contributors-list">
+                        <!-- Contributors will be dynamically populated -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="probability-explanation">
+                <p><strong>How it works:</strong> This calculator combines all recession indicators using a weighted algorithm. 
+                Official indicators (Sahm Rule, Yield Curve, GDP, Unemployment) carry more weight (12-15% each), 
+                while unofficial indicators (Lipstick Index, Stripper Index, etc.) carry less weight (3-6% each). 
+                The final probability represents the likelihood of a recession based on current economic conditions.</p>
+            </div>
+        </section>
+
         <!-- Recession Indexes Section (Middle) -->
         <section class="recession-indexes">
-            <h2>Unofficial Recession Indexes</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Unofficial Recession Indexes</h2>
+                <button id="refresh-recession-indexes" class="refresh-button" title="Refresh Recession Indicators">🔄</button>
+            </div>
             <div class="last-updated" id="recession-indexes-updated">--</div>
             <div class="indexes-grid">
                 <div class="index-card">
                     <h3><a href="https://en.wikipedia.org/wiki/Sahm_rule" target="_blank" rel="noopener noreferrer">Sahm Rule</a></h3>
                     <div class="index-label-small">Value:</div>
-                    <div class="index-value-small" id="sahm-value">--</div>
+                    <div class="skeleton skeleton-number" id="sahm-value-skeleton"></div>
+                    <div class="index-value-small" id="sahm-value" style="display: none;">--</div>
                     <div class="index-label-small">Daily Change:</div>
-                    <div class="index-change" id="sahm-change">--</div>
+                    <div class="skeleton skeleton-change" id="sahm-change-skeleton"></div>
+                    <div class="index-change" id="sahm-change" style="display: none;">--</div>
                     <div class="index-label-small">Trend:</div>
                     <canvas id="sahm-sparkline" class="sparkline" width="120" height="20"></canvas>
                     <div class="index-label-small">Status:</div>
-                    <div class="index-status" id="sahm-status">--</div>
+                    <div class="skeleton skeleton-status" id="sahm-status-skeleton"></div>
+                    <div class="index-status" id="sahm-status" style="display: none;">--</div>
                 </div>
                 <div class="index-card">
                     <h3><a href="https://en.wikipedia.org/wiki/Yield_curve" target="_blank" rel="noopener noreferrer">Yield Curve</a></h3>
@@ -428,20 +518,6 @@
             </div>
         </section>
 
-        <!-- Conclusion Section (Bottom) -->
-        <section class="conclusion-section">
-            <h2>Overall Assessment</h2>
-            <div class="last-updated" id="conclusion-updated">--</div>
-            <div class="conclusion-content">
-                <div class="conclusion-wrapper" id="conclusion-wrapper">
-                    <div class="conclusion-box" id="conclusion-box">
-                        <div class="conclusion-score" id="conclusion-score">--</div>
-                        <div class="conclusion-text" id="conclusion-text">Calculating...</div>
-                        <div class="conclusion-scale-label" id="conclusion-scale-label">Scale: 0-100 (0 = Severe, 50 = Stable, 100 = Exceptional)</div>
-                    </div>
-                </div>
-            </div>
-        </section>
             </div>
         </div>
     </div>

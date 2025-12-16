@@ -80,6 +80,45 @@ const WIKIPEDIA_URLS = {
     'Big Mac Index': 'https://en.wikipedia.org/wiki/Big_Mac_Index'
 };
 
+// Skeleton Loader Helper Functions
+function showSkeleton(elementId) {
+    const skeleton = document.getElementById(elementId);
+    if (skeleton) {
+        skeleton.style.display = 'inline-block';
+    }
+}
+
+function hideSkeleton(elementId) {
+    const skeleton = document.getElementById(elementId);
+    if (skeleton) {
+        skeleton.style.display = 'none';
+    }
+}
+
+function showContent(elementId) {
+    const content = document.getElementById(elementId);
+    if (content) {
+        content.style.display = '';
+    }
+}
+
+function hideContent(elementId) {
+    const content = document.getElementById(elementId);
+    if (content) {
+        content.style.display = 'none';
+    }
+}
+
+function showSkeletonHideContent(skeletonId, contentId) {
+    showSkeleton(skeletonId);
+    hideContent(contentId);
+}
+
+function hideSkeletonShowContent(skeletonId, contentId) {
+    hideSkeleton(skeletonId);
+    showContent(contentId);
+}
+
 // Tooltip descriptions for each index
 const INDEX_TOOLTIPS = {
     'fear-greed': {
@@ -336,20 +375,29 @@ function savePreviousValue(indexId, value) {
 
 // Recession Index Data Structure
 const recessionIndexes = {
-    sahm: { value: null, status: null, name: 'Sahm Rule', unit: '%' },
-    yield: { value: null, status: null, name: 'Yield Curve', unit: '%' },
-    unemployment: { value: null, status: null, name: 'Unemployment Rate', unit: '%' },
-    gdp: { value: null, status: null, name: 'GDP Growth', unit: '%' },
-    lipstick: { value: null, status: null, name: 'Lipstick Index', unit: 'index' },
-    rword: { value: null, status: null, name: 'R-Word Index', unit: 'mentions' },
-    stripper: { value: null, status: null, name: 'Stripper Index', unit: 'index' },
-    vibecession: { value: null, status: null, name: 'Vibecession', unit: 'score' },
-    ads: { value: null, status: null, name: 'ADS Index', unit: 'index' },
-    usedcar: { value: null, status: null, name: 'Used Car Index', unit: 'index' },
-    lego: { value: null, status: null, name: 'Lego Index', unit: 'index' },
-    pizza: { value: null, status: null, name: 'Frozen Pizza Index', unit: 'index' },
-    underwear: { value: null, status: null, name: "Men's Underwear Index", unit: 'index' },
-    bigmac: { value: null, status: null, name: 'Big Mac Index', unit: 'index' }
+    sahm: { value: null, status: null, name: 'Sahm Rule', unit: '%', weight: 0.15, category: 'official' },
+    yield: { value: null, status: null, name: 'Yield Curve', unit: '%', weight: 0.15, category: 'official' },
+    unemployment: { value: null, status: null, name: 'Unemployment Rate', unit: '%', weight: 0.12, category: 'official' },
+    gdp: { value: null, status: null, name: 'GDP Growth', unit: '%', weight: 0.12, category: 'official' },
+    lipstick: { value: null, status: null, name: 'Lipstick Index', unit: 'index', weight: 0.04, category: 'unofficial' },
+    rword: { value: null, status: null, name: 'R-Word Index', unit: 'mentions', weight: 0.06, category: 'unofficial' },
+    stripper: { value: null, status: null, name: 'Stripper Index', unit: 'index', weight: 0.04, category: 'unofficial' },
+    vibecession: { value: null, status: null, name: 'Vibecession', unit: 'score', weight: 0.05, category: 'unofficial' },
+    ads: { value: null, status: null, name: 'ADS Index', unit: 'index', weight: 0.08, category: 'official' },
+    usedcar: { value: null, status: null, name: 'Used Car Index', unit: 'index', weight: 0.05, category: 'unofficial' },
+    lego: { value: null, status: null, name: 'Lego Index', unit: 'index', weight: 0.04, category: 'unofficial' },
+    pizza: { value: null, status: null, name: 'Frozen Pizza Index', unit: 'index', weight: 0.03, category: 'unofficial' },
+    underwear: { value: null, status: null, name: "Men's Underwear Index", unit: 'index', weight: 0.04, category: 'unofficial' },
+    bigmac: { value: null, status: null, name: 'Big Mac Index', unit: 'index', weight: 0.03, category: 'unofficial' }
+};
+
+// Recession Probability Calculator
+const recessionProbability = {
+    current: 0,
+    confidence: { lower: 0, upper: 0 },
+    contributors: [],
+    trend: 'stable',
+    historicalAverage: 25 // Historical baseline probability
 };
 
 // Helper: Fetch with CORS proxy (with better error handling and timeout)
@@ -649,6 +697,10 @@ async function fetchCryptoFearGreedIndex() {
 
 // Update Crypto Fear & Greed display
 function updateCryptoFearGreedDisplay(value, classification) {
+    // Hide skeletons and show content
+    hideSkeletonShowContent('crypto-fear-greed-skeleton', 'crypto-fear-greed-value');
+    hideSkeletonShowContent('crypto-fear-greed-change-skeleton', 'crypto-fear-greed-change');
+    
     document.getElementById('crypto-fear-greed-value').textContent = value;
     document.getElementById('crypto-fear-greed-label').textContent = classification;
     
@@ -774,6 +826,10 @@ async function fetchVIX() {
 
 // Update VIX display
 function updateVIXDisplay(value, classification, change = 0, changePercent = 0) {
+    // Hide skeletons and show content
+    hideSkeletonShowContent('vix-skeleton', 'vix-value');
+    hideSkeletonShowContent('vix-change-skeleton', 'vix-change');
+    
     document.getElementById('vix-value').textContent = value.toFixed(2);
     document.getElementById('vix-label').textContent = classification;
     
@@ -892,6 +948,10 @@ function getClassificationColor(classification, isDarkMode) {
 
 // Update Fear & Greed Display
 function updateFearGreedDisplay(value, classification) {
+    // Hide skeletons and show content
+    hideSkeletonShowContent('fear-greed-skeleton', 'fear-greed-value');
+    hideSkeletonShowContent('fear-greed-change-skeleton', 'fear-greed-change');
+    
     document.getElementById('fear-greed-value').textContent = value;
     const labelEl = document.getElementById('fear-greed-label');
     labelEl.textContent = classification;
@@ -1097,7 +1157,7 @@ async function fetchRecessionIndexes() {
                                     bigmacValue > 5.50 ? 'warning' : 'good';
     
     updateRecessionIndexesDisplay();
-    calculateConclusion();
+    updateRecessionProbabilityDisplay();
     updateTimestamp('recession-indexes-updated');
 }
 
@@ -1126,6 +1186,11 @@ function updateRecessionIndexesDisplay() {
         const changeEl = document.getElementById(`${index.id}-change`);
         
         if (valueEl && statusEl && index.data.value !== null) {
+            // Hide skeletons and show content (if they exist)
+            hideSkeletonShowContent(`${index.id}-value-skeleton`, `${index.id}-value`);
+            hideSkeletonShowContent(`${index.id}-change-skeleton`, `${index.id}-change`);
+            hideSkeletonShowContent(`${index.id}-status-skeleton`, `${index.id}-status`);
+            
             // Extract numeric value for history
             let numericValue = null;
             if (index.id === 'bigmac') {
@@ -1196,6 +1261,196 @@ function getStatusText(status) {
     return statusMap[status] || '—';
 }
 
+// Calculate Recession Probability
+function calculateRecessionProbability() {
+    let totalWeight = 0;
+    let weightedScore = 0;
+    const contributors = [];
+    
+    // Calculate weighted score based on each indicator's status
+    Object.entries(recessionIndexes).forEach(([id, data]) => {
+        if (data.value !== null && data.status !== null) {
+            const weight = data.weight || 0;
+            totalWeight += weight;
+            
+            // Convert status to score: bad = 100, warning = 50, good = 0
+            let score = 0;
+            if (data.status === 'bad') score = 100;
+            else if (data.status === 'warning') score = 50;
+            else if (data.status === 'good') score = 0;
+            
+            const contribution = weight * score;
+            weightedScore += contribution;
+            
+            // Track contributors for breakdown
+            contributors.push({
+                id: id,
+                name: data.name,
+                status: data.status,
+                weight: weight,
+                contribution: contribution,
+                category: data.category
+            });
+        }
+    });
+    
+    // Normalize to 0-100 scale
+    const probability = totalWeight > 0 ? (weightedScore / totalWeight) : 0;
+    
+    // Calculate confidence interval (±10% based on data completeness)
+    const dataCompleteness = totalWeight / 1.0; // Total weights should sum to 1.0
+    const confidenceRange = 10 * (1 - dataCompleteness);
+    
+    // Sort contributors by contribution (highest first)
+    contributors.sort((a, b) => b.contribution - a.contribution);
+    
+    // Determine trend based on historical data
+    const previousProbability = getPreviousValue('recessionProbability') || probability;
+    const change = probability - previousProbability;
+    let trend = 'stable';
+    if (change > 5) trend = 'increasing';
+    else if (change < -5) trend = 'decreasing';
+    
+    // Update global recession probability object
+    recessionProbability.current = Math.round(probability);
+    recessionProbability.confidence = {
+        lower: Math.max(0, Math.round(probability - confidenceRange)),
+        upper: Math.min(100, Math.round(probability + confidenceRange))
+    };
+    recessionProbability.contributors = contributors;
+    recessionProbability.trend = trend;
+    
+    // Save for trend tracking
+    savePreviousValue('recessionProbability', probability);
+    
+    return recessionProbability;
+}
+
+// Update Recession Probability Display
+function updateRecessionProbabilityDisplay() {
+    const prob = calculateRecessionProbability();
+    
+    // Update probability value
+    const probValueEl = document.getElementById('recession-probability-value');
+    if (probValueEl) {
+        probValueEl.textContent = `${prob.current}%`;
+    }
+    
+    // Update confidence range
+    const probRangeEl = document.getElementById('recession-probability-range');
+    if (probRangeEl) {
+        probRangeEl.textContent = `${prob.confidence.lower}% - ${prob.confidence.upper}%`;
+    }
+    
+    // Update classification text
+    const probLabelEl = document.getElementById('recession-probability-label');
+    if (probLabelEl) {
+        let classification = '';
+        let color = '';
+        if (prob.current < 20) {
+            classification = 'Very Low Risk';
+            color = '#28a745';
+        } else if (prob.current < 40) {
+            classification = 'Low Risk';
+            color = '#90ee90';
+        } else if (prob.current < 60) {
+            classification = 'Moderate Risk';
+            color = '#ffc107';
+        } else if (prob.current < 80) {
+            classification = 'High Risk';
+            color = '#ff9800';
+        } else {
+            classification = 'Very High Risk';
+            color = '#dc3545';
+        }
+        probLabelEl.textContent = classification;
+        probLabelEl.style.color = color;
+    }
+    
+    // Update gauge/meter
+    const probMeterEl = document.getElementById('recession-probability-meter');
+    const probMarkerEl = document.getElementById('recession-probability-marker');
+    if (probMeterEl && probMarkerEl) {
+        probMarkerEl.style.left = `${prob.current}%`;
+    }
+    
+    // Update trend indicator
+    const probTrendEl = document.getElementById('recession-probability-trend');
+    if (probTrendEl) {
+        let trendText = '';
+        let trendIcon = '';
+        if (prob.trend === 'increasing') {
+            trendText = 'Increasing';
+            trendIcon = '↗';
+            probTrendEl.className = 'probability-trend trend-up';
+        } else if (prob.trend === 'decreasing') {
+            trendText = 'Decreasing';
+            trendIcon = '↘';
+            probTrendEl.className = 'probability-trend trend-down';
+        } else {
+            trendText = 'Stable';
+            trendIcon = '→';
+            probTrendEl.className = 'probability-trend trend-stable';
+        }
+        probTrendEl.textContent = `${trendIcon} ${trendText}`;
+    }
+    
+    // Update contributors breakdown
+    updateContributorsBreakdown(prob.contributors);
+}
+
+// Update Contributors Breakdown
+function updateContributorsBreakdown(contributors) {
+    const breakdownEl = document.getElementById('recession-contributors-breakdown');
+    if (!breakdownEl) return;
+    
+    // Clear existing content
+    breakdownEl.innerHTML = '';
+    
+    // Show top 5 contributors
+    const topContributors = contributors.slice(0, 5);
+    
+    topContributors.forEach(contributor => {
+        const contributorDiv = document.createElement('div');
+        contributorDiv.className = 'contributor-item';
+        
+        // Calculate percentage of total contribution
+        const totalContribution = contributors.reduce((sum, c) => sum + c.contribution, 0);
+        const percentage = totalContribution > 0 ? (contributor.contribution / totalContribution * 100) : 0;
+        
+        // Status icon
+        let statusIcon = '';
+        let statusClass = '';
+        if (contributor.status === 'bad') {
+            statusIcon = '✗';
+            statusClass = 'status-bad';
+        } else if (contributor.status === 'warning') {
+            statusIcon = '⚠';
+            statusClass = 'status-warning';
+        } else {
+            statusIcon = '✓';
+            statusClass = 'status-good';
+        }
+        
+        contributorDiv.innerHTML = `
+            <div class="contributor-header">
+                <span class="contributor-icon ${statusClass}">${statusIcon}</span>
+                <span class="contributor-name">${contributor.name}</span>
+                <span class="contributor-badge ${contributor.category}">${contributor.category}</span>
+            </div>
+            <div class="contributor-bar-container">
+                <div class="contributor-bar ${statusClass}" style="width: ${percentage}%"></div>
+            </div>
+            <div class="contributor-stats">
+                <span class="contributor-weight">Weight: ${(contributor.weight * 100).toFixed(0)}%</span>
+                <span class="contributor-impact">Impact: ${percentage.toFixed(1)}%</span>
+            </div>
+        `;
+        
+        breakdownEl.appendChild(contributorDiv);
+    });
+}
+
 // Normalize index value to -1 (bad) to 1 (good) scale
 // This function properly handles different scales and directions
 function normalizeIndex(indexId, rawValue) {
@@ -1249,173 +1504,6 @@ function normalizeIndex(indexId, rawValue) {
 }
 
 // Get Sentiment based on average score
-function getSentiment(average, percentage) {
-    // Sentiment scale with different phrases for different ranges
-    if (percentage >= 90) {
-        return { text: 'Economic Conditions: Exceptional', textColor: '#0d4f1c' };
-    } else if (percentage >= 80) {
-        return { text: 'Economic Conditions: Very Strong', textColor: '#155724' };
-    } else if (percentage >= 70) {
-        return { text: 'Economic Conditions: Strong', textColor: '#1e7e34' };
-    } else if (percentage >= 60) {
-        return { text: 'Economic Conditions: Positive', textColor: '#28a745' };
-    } else if (percentage >= 50) {
-        return { text: 'Economic Conditions: Stable', textColor: '#6c757d' };
-    } else if (percentage >= 40) {
-        return { text: 'Economic Conditions: Cautious', textColor: '#856404' };
-    } else if (percentage >= 30) {
-        return { text: 'Economic Conditions: Concerning', textColor: '#b8860b' };
-    } else if (percentage >= 20) {
-        return { text: 'Economic Conditions: Worrisome', textColor: '#dc3545' };
-    } else if (percentage >= 10) {
-        return { text: 'Economic Conditions: Critical', textColor: '#c82333' };
-    } else {
-        return { text: 'Economic Conditions: Severe', textColor: '#721c24' };
-    }
-}
-
-// Get Gradient Color based on percentage (0-100)
-// Changes every 5 percentage points as requested
-function getGradientColor(percentage) {
-    // Round to nearest 5 for discrete color changes
-    const rounded = Math.round(percentage / 5) * 5;
-    const clamped = Math.max(0, Math.min(100, rounded));
-    
-    // Calculate RGB values for gradient
-    // Red at 0%, Yellow at 50%, Green at 100%
-    let r, g, b;
-    
-    if (clamped <= 50) {
-        // Red to Yellow (0% to 50%)
-        r = 255;
-        g = Math.round((clamped / 50) * 255);
-        b = 0;
-    } else {
-        // Yellow to Green (50% to 100%)
-        r = Math.round(255 - ((clamped - 50) / 50) * 255);
-        g = 255;
-        b = 0;
-    }
-    
-    // Create gradient stops (start, mid, end) for smooth gradient effect
-    // Slightly adjust colors for visual depth
-    const start = `rgb(${Math.max(0, Math.min(255, r - 15))}, ${Math.max(0, Math.min(255, g - 15))}, ${b})`;
-    const mid = `rgb(${r}, ${g}, ${b})`;
-    const end = `rgb(${Math.max(0, Math.min(255, r + 15))}, ${Math.max(0, Math.min(255, g + 15))}, ${b})`;
-    
-    return { start, mid, end };
-}
-
-// Get Background Color (lighter version)
-function getBackgroundColor(percentage) {
-    // Calculate RGB values
-    let r, g, b;
-    
-    if (percentage <= 50) {
-        r = 255;
-        g = Math.round((percentage / 50) * 255);
-        b = 0;
-    } else {
-        r = Math.round(255 - ((percentage - 50) / 50) * 255);
-        g = 255;
-        b = 0;
-    }
-    
-    // Make it much lighter (pastel version)
-    r = Math.round(r * 0.15 + 240);
-    g = Math.round(g * 0.15 + 240);
-    b = Math.round(b * 0.15 + 240);
-    
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
-// Calculate Overall Conclusion
-function calculateConclusion() {
-    // Get Fear & Greed value (0-100, where 0-25 = extreme fear, 75-100 = extreme greed)
-    const fearGreedValue = parseInt(document.getElementById('fear-greed-value').textContent) || 50;
-    
-    // Normalize Fear & Greed to -1 (bad) to 1 (good) scale
-    // 0-50 = negative (fear), 50-100 = positive (greed)
-    const fearGreedScore = (fearGreedValue - 50) / 50;
-    
-    // Calculate scores for recession indexes using proper normalization
-    // Convert each to -1 (bad) to 1 (good) scale based on their specific ranges and directions
-    const scores = [];
-    
-    // Normalize all indexes using the configuration
-    Object.keys(recessionIndexes).forEach(indexId => {
-        const normalizedScore = normalizeIndex(indexId, recessionIndexes[indexId].value);
-        if (normalizedScore !== null) {
-            scores.push(normalizedScore);
-        }
-    });
-    
-    // Add Fear & Greed score
-    scores.push(fearGreedScore);
-    
-    // Calculate average
-    const average = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-    
-    // Convert average (-1 to 1) to percentage (0 to 100)
-    const percentage = ((average + 1) / 2) * 100;
-    
-    // Round to nearest 5 for gradient stops
-    const roundedPercentage = Math.round(percentage / 5) * 5;
-    
-    // Determine conclusion with gradient and sentiment scale
-    const conclusionWrapper = document.getElementById('conclusion-wrapper');
-    const conclusionBox = document.getElementById('conclusion-box');
-    const conclusionText = document.getElementById('conclusion-text');
-    
-    // Get sentiment text and color based on average
-    const sentiment = getSentiment(average, percentage);
-    
-    // Set gradient border on wrapper
-    const gradientColor = getGradientColor(percentage);
-    conclusionWrapper.style.background = `linear-gradient(135deg, ${gradientColor.start}, ${gradientColor.mid}, ${gradientColor.end})`;
-    
-    // Set background color (lighter version of gradient)
-    // Check if dark mode is active
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const bgColor = getBackgroundColor(percentage);
-    
-    if (isDarkMode) {
-        // In dark mode, use a darker, more transparent version
-        conclusionBox.style.background = 'rgba(30, 30, 46, 0.95)';
-    } else {
-        conclusionBox.style.background = bgColor;
-    }
-    
-    // Set score (display as percentage with 1 decimal)
-    const conclusionScore = document.getElementById('conclusion-score');
-    if (conclusionScore) {
-        conclusionScore.textContent = `${percentage.toFixed(1)}`;
-        conclusionScore.style.color = sentiment.textColor;
-    }
-    
-    // Set text
-    conclusionText.textContent = sentiment.text;
-    conclusionText.style.color = sentiment.textColor;
-    
-    // Update timestamp
-    updateTimestamp('conclusion-updated');
-    
-    // Update scale label color to match text (slightly lighter)
-    const scaleLabel = document.getElementById('conclusion-scale-label');
-    if (scaleLabel) {
-        // Create a slightly lighter version of the text color
-        const rgb = sentiment.textColor.match(/\d+/g);
-        if (rgb && rgb.length >= 3) {
-            const r = Math.min(255, parseInt(rgb[0]) + 30);
-            const g = Math.min(255, parseInt(rgb[1]) + 30);
-            const b = Math.min(255, parseInt(rgb[2]) + 30);
-            scaleLabel.style.color = `rgb(${r}, ${g}, ${b})`;
-        } else {
-            scaleLabel.style.color = sentiment.textColor;
-        }
-    }
-}
-
 // Fetch Stock Index Data - using Alpha Vantage free API (CORS-friendly)
 async function fetchStockIndex(config, name) {
     // Multi-source strategy for maximum reliability
@@ -1558,6 +1646,11 @@ function updateStockIndexDisplay(indexId, data) {
         document.getElementById(`${indexId}-change-percent`).textContent = '--';
         return;
     }
+    
+    // Hide skeletons and show content
+    hideSkeletonShowContent(`${indexId}-price-skeleton`, `${indexId}-price`);
+    hideSkeletonShowContent(`${indexId}-change-skeleton`, `${indexId}-change`);
+    hideSkeletonShowContent(`${indexId}-change-percent-skeleton`, `${indexId}-change-percent`);
     
     const priceEl = document.getElementById(`${indexId}-price`);
     const changeEl = document.getElementById(`${indexId}-change`);
@@ -1836,10 +1929,6 @@ function initDarkMode() {
             localStorage.setItem('theme', 'light');
         }
         
-        // Recalculate conclusion to update background color for dark mode
-        if (typeof calculateConclusion === 'function') {
-            calculateConclusion();
-        }
         
         // Redraw speedometer gauge to update colors for dark mode
         const fearGreedValue = document.getElementById('fear-greed-value');
@@ -2482,6 +2571,34 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchVIX();
             refreshVixBtn.classList.remove('loading');
             refreshVixBtn.disabled = false;
+        });
+    }
+    
+    // Add Stock Indices refresh button handler
+    const refreshStockIndicesBtn = document.getElementById('refresh-stock-indices');
+    if (refreshStockIndicesBtn) {
+        refreshStockIndicesBtn.addEventListener('click', async () => {
+            refreshStockIndicesBtn.classList.add('loading');
+            refreshStockIndicesBtn.disabled = true;
+            await fetchAllStockIndices();
+            updateTimestamp('stock-indices-updated');
+            refreshStockIndicesBtn.classList.remove('loading');
+            refreshStockIndicesBtn.disabled = false;
+        });
+    }
+    
+    // Add Recession Indicators refresh button handler
+    const refreshRecessionBtn = document.getElementById('refresh-recession-indexes');
+    if (refreshRecessionBtn) {
+        refreshRecessionBtn.addEventListener('click', async () => {
+            refreshRecessionBtn.classList.add('loading');
+            refreshRecessionBtn.disabled = true;
+            await fetchRecessionIndexes();
+            updateRecessionIndexesDisplay();
+            updateRecessionProbabilityDisplay();
+            updateTimestamp('recession-indexes-updated');
+            refreshRecessionBtn.classList.remove('loading');
+            refreshRecessionBtn.disabled = false;
         });
     }
     
