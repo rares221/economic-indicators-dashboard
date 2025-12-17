@@ -1577,9 +1577,9 @@ body.dark-mode .chart-modal-close:hover {
 .probability-value {
     font-size: 4.5em;
     font-weight: bold;
-    color: #667eea;
     margin: 10px 0;
     line-height: 1;
+    transition: color 0.3s ease;
 }
 
 .probability-label {
@@ -1799,10 +1799,24 @@ body.dark-mode .chart-modal-close:hover {
 }
 
 .probability-explanation p {
-    margin: 0;
+    margin: 0 0 12px 0;
     line-height: 1.6;
     color: #555;
     font-size: 0.9em;
+}
+
+.probability-explanation p:last-child {
+    margin-bottom: 0;
+}
+
+.probability-explanation code {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+    color: #667eea;
+    font-weight: 600;
 }
 
 /* Dark mode for probability calculator */
@@ -1820,9 +1834,7 @@ body.dark-mode .probability-main {
     border-color: rgba(102, 126, 234, 0.3);
 }
 
-body.dark-mode .probability-value {
-    color: #8b9aff;
-}
+/* Probability value color is now set dynamically via JavaScript */
 
 body.dark-mode .probability-label {
     color: #e0e0e0;
@@ -1860,6 +1872,11 @@ body.dark-mode .probability-explanation {
 
 body.dark-mode .probability-explanation p {
     color: #b0b0b0;
+}
+
+body.dark-mode .probability-explanation code {
+    background: rgba(139, 154, 255, 0.15);
+    color: #8b9aff;
 }
 
 body.dark-mode .probability-marker {

@@ -343,10 +343,17 @@
             </div>
             
             <div class="probability-explanation">
-                <p><strong>How it works:</strong> This calculator combines all recession indicators using a weighted algorithm. 
-                Official indicators (Sahm Rule, Yield Curve, GDP, Unemployment) carry more weight (12-15% each), 
-                while unofficial indicators (Lipstick Index, Stripper Index, etc.) carry less weight (3-6% each). 
-                The final probability represents the likelihood of a recession based on current economic conditions.</p>
+                <p><strong>How it works:</strong> This calculator analyzes all <strong>26 recession indicators</strong> below using a weighted scoring algorithm.</p>
+                
+                <p><strong>The Math:</strong> Each indicator is assigned a status (Good = 0 points, Warning = 50 points, Bad = 100 points) and a weight based on reliability. 
+                The weighted average is calculated as: <code>Probability = Σ(Status × Weight) / Σ(Weights)</code></p>
+                
+                <p><strong>Weights:</strong> Official indicators (Sahm Rule, Yield Curve, GDP, Unemployment, ADS Index) carry higher weights (8-15% each), 
+                while unofficial indicators (Lipstick, Stripper, Big Mac, Cardboard Box, etc.) carry lower weights (1-4% each). 
+                This ensures proven economic metrics have more influence than quirky indicators.</p>
+                
+                <p><strong>Result:</strong> The final score (0-100%) represents recession likelihood, with confidence intervals showing uncertainty based on data completeness. 
+                The breakdown shows which indicators contribute most to the current probability.</p>
             </div>
         </section>
 
@@ -514,6 +521,138 @@
                     <canvas id="bigmac-sparkline" class="sparkline" width="120" height="20"></canvas>
                     <div class="index-label-small">Status:</div>
                     <div class="index-status" id="bigmac-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Cardboard" target="_blank" rel="noopener noreferrer">Cardboard Box Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="cardboard-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="cardboard-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="cardboard-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="cardboard-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Hemline_index" target="_blank" rel="noopener noreferrer">Hemline Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="hemline-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="hemline-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="hemline-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="hemline-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Economic_indicator" target="_blank" rel="noopener noreferrer">Waiter's Bow Tie Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="bowtie-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="bowtie-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="bowtie-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="bowtie-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Skyscraper_Index" target="_blank" rel="noopener noreferrer">Skyscraper Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="skyscraper-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="skyscraper-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="skyscraper-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="skyscraper-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Economic_indicator" target="_blank" rel="noopener noreferrer">Hot Waitress Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="waitress-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="waitress-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="waitress-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="waitress-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Economic_indicator" target="_blank" rel="noopener noreferrer">Neckties Sales Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="neckties-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="neckties-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="neckties-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="neckties-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Champagne" target="_blank" rel="noopener noreferrer">Champagne Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="champagne-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="champagne-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="champagne-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="champagne-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Parking_lot" target="_blank" rel="noopener noreferrer">Parking Lot Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="parking-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="parking-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="parking-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="parking-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Waste" target="_blank" rel="noopener noreferrer">Trash Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="trash-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="trash-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="trash-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="trash-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Bicycle_messenger" target="_blank" rel="noopener noreferrer">Bike Messenger Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="bikemessenger-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="bikemessenger-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="bikemessenger-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="bikemessenger-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Temporary_work" target="_blank" rel="noopener noreferrer">Temp Worker Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="tempworker-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="tempworker-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="tempworker-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="tempworker-status">--</div>
+                </div>
+                <div class="index-card">
+                    <h3><a href="https://en.wikipedia.org/wiki/Coffeehouse" target="_blank" rel="noopener noreferrer">Coffee Shop Laptop Index</a></h3>
+                    <div class="index-label-small">Value:</div>
+                    <div class="index-value-small" id="coffeeshop-value">--</div>
+                    <div class="index-label-small">Daily Change:</div>
+                    <div class="index-change" id="coffeeshop-change">--</div>
+                    <div class="index-label-small">Trend:</div>
+                    <canvas id="coffeeshop-sparkline" class="sparkline" width="120" height="20"></canvas>
+                    <div class="index-label-small">Status:</div>
+                    <div class="index-status" id="coffeeshop-status">--</div>
                 </div>
             </div>
         </section>

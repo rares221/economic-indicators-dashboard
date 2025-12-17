@@ -388,7 +388,19 @@ const recessionIndexes = {
     lego: { value: null, status: null, name: 'Lego Index', unit: 'index', weight: 0.04, category: 'unofficial' },
     pizza: { value: null, status: null, name: 'Frozen Pizza Index', unit: 'index', weight: 0.03, category: 'unofficial' },
     underwear: { value: null, status: null, name: "Men's Underwear Index", unit: 'index', weight: 0.04, category: 'unofficial' },
-    bigmac: { value: null, status: null, name: 'Big Mac Index', unit: 'index', weight: 0.03, category: 'unofficial' }
+    bigmac: { value: null, status: null, name: 'Big Mac Index', unit: 'index', weight: 0.03, category: 'unofficial' },
+    cardboard: { value: null, status: null, name: 'Cardboard Box Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    hemline: { value: null, status: null, name: 'Hemline Index', unit: 'index', weight: 0.01, category: 'unofficial' },
+    bowtie: { value: null, status: null, name: "Waiter's Bow Tie Index", unit: 'index', weight: 0.02, category: 'unofficial' },
+    skyscraper: { value: null, status: null, name: 'Skyscraper Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    waitress: { value: null, status: null, name: 'Hot Waitress Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    neckties: { value: null, status: null, name: 'Neckties Sales Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    champagne: { value: null, status: null, name: 'Champagne Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    parking: { value: null, status: null, name: 'Parking Lot Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    trash: { value: null, status: null, name: 'Trash Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    bikemessenger: { value: null, status: null, name: 'Bike Messenger Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    tempworker: { value: null, status: null, name: 'Temp Worker Index', unit: 'index', weight: 0.02, category: 'unofficial' },
+    coffeeshop: { value: null, status: null, name: 'Coffee Shop Laptop Index', unit: 'index', weight: 0.02, category: 'unofficial' }
 };
 
 // Recession Probability Calculator
@@ -1156,6 +1168,90 @@ async function fetchRecessionIndexes() {
     recessionIndexes.bigmac.status = bigmacValue > 6.00 ? 'bad' : 
                                     bigmacValue > 5.50 ? 'warning' : 'good';
     
+    // Cardboard Box Index (shipping/manufacturing activity)
+    // Lower = bad (less shipping/manufacturing)
+    const cardboardValue = (50 + Math.random() * 50).toFixed(0);
+    recessionIndexes.cardboard.value = cardboardValue;
+    recessionIndexes.cardboard.status = cardboardValue < 60 ? 'bad' : 
+                                        cardboardValue < 75 ? 'warning' : 'good';
+    
+    // Hemline Index (fashion trends correlating with economy)
+    // Lower hemlines (longer skirts) = bad economy
+    const hemlineValue = (40 + Math.random() * 40).toFixed(0);
+    recessionIndexes.hemline.value = hemlineValue;
+    recessionIndexes.hemline.status = hemlineValue < 50 ? 'bad' : 
+                                      hemlineValue < 65 ? 'warning' : 'good';
+    
+    // Waiter's Bow Tie Index (fine dining employment)
+    // Lower = bad (fewer fine dining jobs)
+    const bowtieValue = (45 + Math.random() * 45).toFixed(0);
+    recessionIndexes.bowtie.value = bowtieValue;
+    recessionIndexes.bowtie.status = bowtieValue < 55 ? 'bad' : 
+                                     bowtieValue < 70 ? 'warning' : 'good';
+    
+    // Skyscraper Index (tall building construction)
+    // Higher = bad (construction boom often precedes recession)
+    const skyscraperValue = (30 + Math.random() * 50).toFixed(0);
+    recessionIndexes.skyscraper.value = skyscraperValue;
+    recessionIndexes.skyscraper.status = skyscraperValue > 70 ? 'bad' : 
+                                         skyscraperValue > 55 ? 'warning' : 'good';
+    
+    // Hot Waitress Index (attractive people in service jobs)
+    // Higher = bad (more attractive people taking service jobs = fewer opportunities)
+    const waitressValue = (35 + Math.random() * 45).toFixed(0);
+    recessionIndexes.waitress.value = waitressValue;
+    recessionIndexes.waitress.status = waitressValue > 65 ? 'bad' : 
+                                       waitressValue > 50 ? 'warning' : 'good';
+    
+    // Neckties Sales Index (formal wear sales)
+    // Lower = bad (less business activity/formality)
+    const necktiesValue = (40 + Math.random() * 50).toFixed(0);
+    recessionIndexes.neckties.value = necktiesValue;
+    recessionIndexes.neckties.status = necktiesValue < 55 ? 'bad' : 
+                                       necktiesValue < 70 ? 'warning' : 'good';
+    
+    // Champagne Index (luxury alcohol consumption)
+    // Lower = bad (less celebration/luxury spending)
+    const champagneValue = (45 + Math.random() * 45).toFixed(0);
+    recessionIndexes.champagne.value = champagneValue;
+    recessionIndexes.champagne.status = champagneValue < 60 ? 'bad' : 
+                                        champagneValue < 75 ? 'warning' : 'good';
+    
+    // Parking Lot Index (retail parking lot occupancy)
+    // Lower = bad (less retail activity)
+    const parkingValue = (50 + Math.random() * 40).toFixed(0);
+    recessionIndexes.parking.value = parkingValue;
+    recessionIndexes.parking.status = parkingValue < 65 ? 'bad' : 
+                                      parkingValue < 78 ? 'warning' : 'good';
+    
+    // Trash Index (commercial waste volume)
+    // Lower = bad (less economic activity)
+    const trashValue = (55 + Math.random() * 35).toFixed(0);
+    recessionIndexes.trash.value = trashValue;
+    recessionIndexes.trash.status = trashValue < 70 ? 'bad' : 
+                                    trashValue < 82 ? 'warning' : 'good';
+    
+    // Bike Messenger Index (gig economy employment)
+    // Higher = bad (more people in gig economy = fewer traditional jobs)
+    const bikemessengerValue = (30 + Math.random() * 50).toFixed(0);
+    recessionIndexes.bikemessenger.value = bikemessengerValue;
+    recessionIndexes.bikemessenger.status = bikemessengerValue > 65 ? 'bad' : 
+                                            bikemessengerValue > 50 ? 'warning' : 'good';
+    
+    // Temp Worker Index (temporary vs permanent employment)
+    // Higher = bad (more temp jobs = less job security)
+    const tempworkerValue = (35 + Math.random() * 45).toFixed(0);
+    recessionIndexes.tempworker.value = tempworkerValue;
+    recessionIndexes.tempworker.status = tempworkerValue > 65 ? 'bad' : 
+                                         tempworkerValue > 50 ? 'warning' : 'good';
+    
+    // Coffee Shop Laptop Index (unemployed professionals)
+    // Higher = bad (more people working from coffee shops = unemployment/underemployment)
+    const coffeeshopValue = (30 + Math.random() * 50).toFixed(0);
+    recessionIndexes.coffeeshop.value = coffeeshopValue;
+    recessionIndexes.coffeeshop.status = coffeeshopValue > 65 ? 'bad' : 
+                                         coffeeshopValue > 50 ? 'warning' : 'good';
+    
     updateRecessionIndexesDisplay();
     updateRecessionProbabilityDisplay();
     updateTimestamp('recession-indexes-updated');
@@ -1177,7 +1273,19 @@ function updateRecessionIndexesDisplay() {
         { id: 'lego', data: recessionIndexes.lego },
         { id: 'pizza', data: recessionIndexes.pizza },
         { id: 'underwear', data: recessionIndexes.underwear },
-        { id: 'bigmac', data: recessionIndexes.bigmac }
+        { id: 'bigmac', data: recessionIndexes.bigmac },
+        { id: 'cardboard', data: recessionIndexes.cardboard },
+        { id: 'hemline', data: recessionIndexes.hemline },
+        { id: 'bowtie', data: recessionIndexes.bowtie },
+        { id: 'skyscraper', data: recessionIndexes.skyscraper },
+        { id: 'waitress', data: recessionIndexes.waitress },
+        { id: 'neckties', data: recessionIndexes.neckties },
+        { id: 'champagne', data: recessionIndexes.champagne },
+        { id: 'parking', data: recessionIndexes.parking },
+        { id: 'trash', data: recessionIndexes.trash },
+        { id: 'bikemessenger', data: recessionIndexes.bikemessenger },
+        { id: 'tempworker', data: recessionIndexes.tempworker },
+        { id: 'coffeeshop', data: recessionIndexes.coffeeshop }
     ];
     
     indexes.forEach(index => {
@@ -1330,10 +1438,31 @@ function calculateRecessionProbability() {
 function updateRecessionProbabilityDisplay() {
     const prob = calculateRecessionProbability();
     
-    // Update probability value
+    // Determine color based on probability level
+    let color = '';
+    let classification = '';
+    if (prob.current < 20) {
+        classification = 'Very Low Risk';
+        color = '#28a745';
+    } else if (prob.current < 40) {
+        classification = 'Low Risk';
+        color = '#90ee90';
+    } else if (prob.current < 60) {
+        classification = 'Moderate Risk';
+        color = '#ffc107';
+    } else if (prob.current < 80) {
+        classification = 'High Risk';
+        color = '#ff9800';
+    } else {
+        classification = 'Very High Risk';
+        color = '#dc3545';
+    }
+    
+    // Update probability value with adaptive color
     const probValueEl = document.getElementById('recession-probability-value');
     if (probValueEl) {
         probValueEl.textContent = `${prob.current}%`;
+        probValueEl.style.color = color;
     }
     
     // Update confidence range
@@ -1342,27 +1471,9 @@ function updateRecessionProbabilityDisplay() {
         probRangeEl.textContent = `${prob.confidence.lower}% - ${prob.confidence.upper}%`;
     }
     
-    // Update classification text
+    // Update classification text with same color
     const probLabelEl = document.getElementById('recession-probability-label');
     if (probLabelEl) {
-        let classification = '';
-        let color = '';
-        if (prob.current < 20) {
-            classification = 'Very Low Risk';
-            color = '#28a745';
-        } else if (prob.current < 40) {
-            classification = 'Low Risk';
-            color = '#90ee90';
-        } else if (prob.current < 60) {
-            classification = 'Moderate Risk';
-            color = '#ffc107';
-        } else if (prob.current < 80) {
-            classification = 'High Risk';
-            color = '#ff9800';
-        } else {
-            classification = 'Very High Risk';
-            color = '#dc3545';
-        }
         probLabelEl.textContent = classification;
         probLabelEl.style.color = color;
     }
