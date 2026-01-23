@@ -24,3 +24,5 @@ config.local.js
 # Personal notes
 notes.txt
 TODO.txt
+API_INTEGRATION_PLAN.md
+API_ANALYSIS_AND_REPLACEMENTS.md

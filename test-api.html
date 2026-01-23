@@ -585,32 +585,68 @@
             
             try {
                 const url = 'https://query1.finance.yahoo.com/v8/finance/chart/^GSPC?interval=1d&range=1d';
-                log(logId, `📡 Attempting direct fetch...`, 'info');
+                let data;
+                let method = 'unknown';
                 
-                let response, data;
+                // Try multiple proxies in order
+                const proxies = [
+                    { url: 'https://api.codetabs.com/v1/proxy?quest=', name: 'codetabs' },
+                    { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' },
+                    { url: 'https://corsproxy.io/?', name: 'corsproxy' }
+                ];
                 
                 // Try direct first
                 try {
-                    response = await fetch(url);
+                    log(logId, `📡 Attempting direct fetch...`, 'info');
+                    const response = await fetch(url);
                     if (response.ok) {
                         data = await response.json();
+                        method = 'direct';
                         log(logId, `✓ Direct fetch successful!`, 'success');
                     }
                 } catch (corsError) {
-                    log(logId, `⚠ Direct fetch blocked by CORS, trying proxy...`, 'warning');
-                    
-                    // Try with proxy
-                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-                    response = await fetch(proxyUrl);
-                    data = await response.json();
-                    log(logId, `✓ Proxy fetch successful!`, 'success');
+                    log(logId, `⚠ Direct fetch blocked by CORS`, 'warning');
+                }
+                
+                // If direct failed, try proxies
+                if (!data) {
+                    for (const proxy of proxies) {
+                        try {
+                            log(logId, `📡 Trying ${proxy.name} proxy...`, 'info');
+                            const proxyUrl = proxy.url + encodeURIComponent(url);
+                            const response = await fetch(proxyUrl);
+                            
+                            if (response.ok) {
+                                const text = await response.text();
+                                // Try to parse as JSON
+                                try {
+                                    data = JSON.parse(text);
+                                    method = proxy.name;
+                                    log(logId, `✓ ${proxy.name} proxy successful!`, 'success');
+                                    break;
+                                } catch (parseError) {
+                                    log(logId, `⚠ ${proxy.name} returned invalid JSON`, 'warning');
+                                    continue;
+                                }
+                            } else {
+                                log(logId, `⚠ ${proxy.name} returned HTTP ${response.status}`, 'warning');
+                            }
+                        } catch (proxyError) {
+                            log(logId, `⚠ ${proxy.name} failed: ${proxyError.message}`, 'warning');
+                            continue;
+                        }
+                    }
                 }
                 
                 const endTime = performance.now();
                 const duration = Math.round(endTime - startTime);
                 stats.times.push(duration);
                 
-                log(logId, `✓ Response received in ${duration}ms`, 'success');
+                if (!data) {
+                    throw new Error('All methods failed - CORS blocked on all proxies');
+                }
+                
+                log(logId, `✓ Response received in ${duration}ms via ${method}`, 'success');
                 
                 if (data && data.chart && data.chart.result && data.chart.result.length > 0) {
                     const result = data.chart.result[0];
@@ -632,7 +668,8 @@
                         changePercent: changePercent.toFixed(2) + '%',
                         currency: meta.currency,
                         exchangeName: meta.exchangeName,
-                        marketState: meta.marketState
+                        marketState: meta.marketState,
+                        fetchMethod: method
                     });
                     
                     updateStatus(statusId, 'success');
@@ -643,6 +680,7 @@
                 
             } catch (error) {
                 log(logId, `✗ Error: ${error.message}`, 'error');
+                log(logId, `💡 Tip: Yahoo Finance blocks CORS. Try using CORS proxies.`, 'warning');
                 updateStatus(statusId, 'error');
                 stats.failed++;
             }
@@ -663,32 +701,68 @@
             
             try {
                 const url = 'https://query1.finance.yahoo.com/v8/finance/chart/^VIX?interval=1d&range=1d';
-                log(logId, `📡 Attempting direct fetch...`, 'info');
+                let data;
+                let method = 'unknown';
                 
-                let response, data;
+                // Try multiple proxies in order
+                const proxies = [
+                    { url: 'https://api.codetabs.com/v1/proxy?quest=', name: 'codetabs' },
+                    { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' },
+                    { url: 'https://corsproxy.io/?', name: 'corsproxy' }
+                ];
                 
                 // Try direct first
                 try {
-                    response = await fetch(url);
+                    log(logId, `📡 Attempting direct fetch...`, 'info');
+                    const response = await fetch(url);
                     if (response.ok) {
                         data = await response.json();
+                        method = 'direct';
                         log(logId, `✓ Direct fetch successful!`, 'success');
                     }
                 } catch (corsError) {
-                    log(logId, `⚠ Direct fetch blocked by CORS, trying proxy...`, 'warning');
-                    
-                    // Try with proxy
-                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-                    response = await fetch(proxyUrl);
-                    data = await response.json();
-                    log(logId, `✓ Proxy fetch successful!`, 'success');
+                    log(logId, `⚠ Direct fetch blocked by CORS`, 'warning');
+                }
+                
+                // If direct failed, try proxies
+                if (!data) {
+                    for (const proxy of proxies) {
+                        try {
+                            log(logId, `📡 Trying ${proxy.name} proxy...`, 'info');
+                            const proxyUrl = proxy.url + encodeURIComponent(url);
+                            const response = await fetch(proxyUrl);
+                            
+                            if (response.ok) {
+                                const text = await response.text();
+                                // Try to parse as JSON
+                                try {
+                                    data = JSON.parse(text);
+                                    method = proxy.name;
+                                    log(logId, `✓ ${proxy.name} proxy successful!`, 'success');
+                                    break;
+                                } catch (parseError) {
+                                    log(logId, `⚠ ${proxy.name} returned invalid JSON`, 'warning');
+                                    continue;
+                                }
+                            } else {
+                                log(logId, `⚠ ${proxy.name} returned HTTP ${response.status}`, 'warning');
+                            }
+                        } catch (proxyError) {
+                            log(logId, `⚠ ${proxy.name} failed: ${proxyError.message}`, 'warning');
+                            continue;
+                        }
+                    }
                 }
                 
                 const endTime = performance.now();
                 const duration = Math.round(endTime - startTime);
                 stats.times.push(duration);
                 
-                log(logId, `✓ Response received in ${duration}ms`, 'success');
+                if (!data) {
+                    throw new Error('All methods failed - CORS blocked on all proxies');
+                }
+                
+                log(logId, `✓ Response received in ${duration}ms via ${method}`, 'success');
                 
                 if (data && data.chart && data.chart.result && data.chart.result.length > 0) {
                     const result = data.chart.result[0];
@@ -717,7 +791,8 @@
                         previousClose: previousClose.toFixed(2),
                         change: change.toFixed(2),
                         changePercent: changePercent.toFixed(2) + '%',
-                        marketState: meta.marketState
+                        marketState: meta.marketState,
+                        fetchMethod: method
                     });
                     
                     updateStatus(statusId, 'success');
@@ -728,6 +803,7 @@
                 
             } catch (error) {
                 log(logId, `✗ Error: ${error.message}`, 'error');
+                log(logId, `💡 Tip: Yahoo Finance blocks CORS. Using fallback proxies.`, 'warning');
                 updateStatus(statusId, 'error');
                 stats.failed++;
             }

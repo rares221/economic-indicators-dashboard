@@ -441,12 +441,36 @@ body.dark-mode .debug-output .debug-warning {
     font-size: 1.8em;
 }
 
-/* Dual Fear & Greed Container */
+/* Fear & Greed Container (3 panels) */
 .fear-greed-dual-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
     margin-top: 20px;
+}
+
+/* Social Sentiment specific styles */
+.social-sentiment-sources {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.source-badge {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    cursor: help;
+}
+
+body.dark-mode .source-badge {
+    background: rgba(102, 126, 234, 0.25);
+    color: #8b9bea;
 }
 
 .fear-greed-panel {
@@ -862,6 +886,20 @@ body.dark-mode .debug-output .debug-warning {
 }
 
 /* Responsive Design */
+
+/* Large tablets / small laptops - 2 columns for sentiment panels */
+@media (max-width: 1200px) {
+    .fear-greed-dual-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    /* Social sentiment goes full width on its own row */
+    .fear-greed-dual-container .social-sentiment-panel {
+        grid-column: span 2;
+    }
+}
+
 @media (max-width: 1024px) {
     .main-layout {
         grid-template-columns: 1fr;
@@ -2075,7 +2113,11 @@ body.dark-mode .skeleton {
     
     .fear-greed-dual-container {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
+    }
+    
+    .social-sentiment-sources {
+        margin-top: 10px;
     }
     
     .vix-panel {
@@ -2103,3 +2145,500 @@ body.dark-mode .skeleton {
     }
 }
 
+/* =============================================================================
+   MAIN CONTENT TABS
+   ============================================================================= */
+
+.main-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 8px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.main-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.main-tab:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #333;
+}
+
+.main-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.main-tab .tab-icon {
+    font-size: 1.2rem;
+}
+
+.main-tab .tab-label {
+    white-space: nowrap;
+}
+
+/* Dark mode tabs */
+body.dark-mode .main-tabs {
+    background: #1e1e2e;
+    border-color: #2a2a3e;
+}
+
+body.dark-mode .main-tab {
+    color: #b0b0b0;
+}
+
+body.dark-mode .main-tab:hover {
+    background: rgba(102, 126, 234, 0.15);
+    color: #e0e0e0;
+}
+
+body.dark-mode .main-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Tab Panels */
+.tab-panels {
+    position: relative;
+}
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* API Cost Notice */
+.api-cost-notice {
+    font-size: 0.8rem;
+    color: #b45309;
+    margin: 8px 0 16px 0;
+    padding: 8px 12px;
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 6px;
+    border-left: 3px solid #f59e0b;
+    font-weight: 500;
+}
+
+body.dark-mode .api-cost-notice {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+/* Placeholder for empty tab content */
+.news-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+.placeholder-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.placeholder-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.placeholder-subtext {
+    font-size: 0.85rem;
+    color: #666;
+    opacity: 0.8;
+}
+
+/* Dark mode placeholder */
+body.dark-mode .news-placeholder {
+    background: #252538;
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .placeholder-text {
+    color: #e0e0e0;
+}
+
+body.dark-mode .placeholder-subtext {
+    color: #b0b0b0;
+}
+
+/* =============================================================================
+   NEWS TAB STYLES
+   ============================================================================= */
+
+.news-section,
+.pelosi-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.news-section h2,
+.pelosi-section h2 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+body.dark-mode .news-section,
+body.dark-mode .pelosi-section {
+    background: #1e1e2e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .news-section h2,
+body.dark-mode .pelosi-section h2 {
+    color: #e0e0e0;
+}
+
+.news-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.news-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.news-card:hover {
+    border-color: #667eea;
+    transform: translateX(4px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.news-card-image {
+    width: 120px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #f0f0f0;
+    flex-shrink: 0;
+}
+
+.news-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.news-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.news-card-source {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.news-card-time {
+    opacity: 0.7;
+}
+
+/* Dark mode news cards */
+body.dark-mode .news-card {
+    background: #252538;
+    border-color: #3a3a4e;
+}
+
+body.dark-mode .news-card:hover {
+    border-color: #8b9aff;
+    box-shadow: 0 4px 15px rgba(139, 154, 255, 0.2);
+}
+
+body.dark-mode .news-card-image {
+    background: #1a1a2e;
+}
+
+body.dark-mode .news-card-title {
+    color: #e0e0e0;
+}
+
+body.dark-mode .news-card-meta {
+    color: #b0b0b0;
+}
+
+body.dark-mode .news-card-source {
+    color: #8b9aff;
+}
+
+/* =============================================================================
+   PELOSI TRACKER / CAPITOL TRADES STYLES
+   ============================================================================= */
+
+.pelosi-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.pelosi-filter-select {
+    padding: 10px 16px;
+    background: white;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.pelosi-filter-select option {
+    background: white;
+    color: #333;
+    padding: 10px;
+}
+
+.pelosi-filter-select:hover,
+.pelosi-filter-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* Dark mode for filter selects */
+body.dark-mode .pelosi-filter-select {
+    background: #252538;
+    border-color: rgba(102, 126, 234, 0.4);
+    color: #e0e0e0;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+body.dark-mode .pelosi-filter-select option {
+    background: #252538;
+    color: #e0e0e0;
+}
+
+body.dark-mode .pelosi-filter-select:hover,
+body.dark-mode .pelosi-filter-select:focus {
+    border-color: #8b9aff;
+}
+
+.pelosi-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.trade-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.2s ease;
+}
+
+.trade-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.trade-card.buy {
+    border-left: 4px solid #22c55e;
+}
+
+.trade-card.sell {
+    border-left: 4px solid #ef4444;
+}
+
+.trade-type {
+    width: 60px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.trade-type.buy {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
+}
+
+.trade-type.sell {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+}
+
+.trade-details {
+    flex: 1;
+}
+
+.trade-ticker {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.trade-company {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.trade-politician {
+    font-size: 0.85rem;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.trade-amount {
+    text-align: right;
+}
+
+.trade-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.trade-date {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+/* Dark mode trade cards */
+body.dark-mode .trade-card {
+    background: #252538;
+    border-color: #3a3a4e;
+}
+
+body.dark-mode .trade-card:hover {
+    border-color: #8b9aff;
+    box-shadow: 0 4px 15px rgba(139, 154, 255, 0.2);
+}
+
+body.dark-mode .trade-type.buy {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+}
+
+body.dark-mode .trade-type.sell {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+body.dark-mode .trade-ticker {
+    color: #e0e0e0;
+}
+
+body.dark-mode .trade-company {
+    color: #b0b0b0;
+}
+
+body.dark-mode .trade-politician {
+    color: #8b9aff;
+}
+
+body.dark-mode .trade-value {
+    color: #e0e0e0;
+}
+
+body.dark-mode .trade-date {
+    color: #b0b0b0;
+}
+
+/* Responsive tabs */
+@media (max-width: 768px) {
+    .main-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .main-tab {
+        flex: 1 1 100%;
+        padding: 12px 16px;
+    }
+    
+    .main-tab .tab-label {
+        display: inline;
+    }
+    
+    .pelosi-filters {
+        flex-direction: column;
+    }
+    
+    .news-card {
+        flex-direction: column;
+    }
+    
+    .news-card-image {
+        width: 100%;
+        height: 150px;
+    }
+}

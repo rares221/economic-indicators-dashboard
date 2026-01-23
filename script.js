@@ -1,6 +1,96 @@
 // Configuration
-const FRED_API_KEY = 'demo'; // Replace with your FRED API key from https://fred.stlouisfed.org/docs/api/api_key.html
+// API keys are loaded from config.local.js (gitignored for security)
+// If config not loaded, fall back to demo/empty values
+const FRED_API_KEY = window.API_CONFIG?.FRED_API_KEY || 'demo';
+const APIFY_TOKEN = window.API_CONFIG?.APIFY_TOKEN || '';
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
+// =============================================================================
+// APIFY API HELPER (Secure Bearer Token Authentication)
+// Docs: https://docs.apify.com/api/v2
+// =============================================================================
+
+/**
+ * Run an Apify Actor and get results (synchronous mode - waits up to 5 min)
+ * Uses Bearer token auth (more secure than query params)
+ * Includes exponential backoff for rate limiting (429 errors)
+ * 
+ * @param {string} actorId - Actor ID (e.g., 'aymorato/fast-google-news-scraper')
+ * @param {object} input - Actor input parameters
+ * @param {object} options - Optional settings { timeout, maxRetries }
+ * @returns {Promise<Array>} - Dataset items from the Actor run
+ */
+async function runApifyActor(actorId, input = {}, options = {}) {
+    const { timeout = 300, maxRetries = 3 } = options;
+    
+    if (!APIFY_TOKEN) {
+        console.warn('⚠️ Apify token not configured. Add it to config.local.js');
+        return [];
+    }
+    
+    const url = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?timeout=${timeout}`;
+    let delay = 500; // Initial delay for exponential backoff
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${APIFY_TOKEN}`,  // Secure: Bearer auth (recommended)
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(input)
+            });
+            
+            // Handle rate limiting with exponential backoff
+            if (response.status === 429) {
+                if (attempt < maxRetries) {
+                    const waitTime = delay + Math.random() * delay;
+                    console.warn(`⏳ Rate limited, retrying in ${Math.round(waitTime)}ms...`);
+                    await new Promise(r => setTimeout(r, waitTime));
+                    delay *= 2; // Double the delay for next attempt
+                    continue;
+                }
+                throw new Error('Rate limit exceeded after max retries');
+            }
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            }
+            
+            return await response.json();
+            
+        } catch (error) {
+            if (attempt === maxRetries) {
+                console.error(`❌ Apify Actor ${actorId} failed:`, error.message);
+                return [];
+            }
+            // Network error - retry
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 2;
+        }
+    }
+    
+    return [];
+}
+
+/**
+ * Get the status of an Apify Actor run
+ * @param {string} runId - The run ID
+ * @returns {Promise<object>} - Run status object
+ */
+async function getApifyRunStatus(runId) {
+    if (!APIFY_TOKEN) return null;
+    
+    const response = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
+    });
+    
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.data;
+}
 
 // Market Hours Configuration (in UTC)
 const MARKET_HOURS = {
@@ -128,6 +218,10 @@ const INDEX_TOOLTIPS = {
     'vix': {
         title: 'VIX - Volatility Index',
         description: 'The CBOE Volatility Index (VIX) measures expected market volatility over the next 30 days. Often called the "fear gauge," values below 12 indicate low volatility, 12-20 is normal, 20-30 is elevated, 30-40 is high, and above 40 indicates extreme market stress.'
+    },
+    'social-sentiment': {
+        title: 'Reddit Sentiment Index',
+        description: 'Analyzes retail investor sentiment from Reddit (r/wallstreetbets, r/stocks, r/investing). Scores from 0 (Extreme Bearish) to 100 (Extreme Bullish) based on keyword analysis of recent posts, weighted by engagement. A contrarian indicator—extreme readings often precede market reversals.'
     },
     'sahm': {
         title: 'Sahm Rule',
@@ -413,58 +507,66 @@ const recessionProbability = {
 };
 
 // Helper: Fetch with CORS proxy (with better error handling and timeout)
-async function fetchWithProxy(url, timeout = 5000) {
+async function fetchWithProxy(url, timeout = 5000, retries = 2) {
     try {
         // Try multiple CORS proxies for better reliability
         // Reordered to try more reliable ones first
         const proxies = [
             { url: 'https://api.codetabs.com/v1/proxy?quest=', name: 'codetabs' },
             { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' },
-            { url: 'https://corsproxy.io/?', name: 'corsproxy' }
+            { url: 'https://corsproxy.io/?', name: 'corsproxy' },
+            { url: 'https://cors-anywhere.herokuapp.com/', name: 'cors-anywhere' }
         ];
         
         for (const proxy of proxies) {
-            try {
-                const proxyUrl = proxy.url + encodeURIComponent(url);
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-                
-                const response = await fetch(proxyUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                    signal: controller.signal,
-                    mode: 'cors'
-                });
-                
-                clearTimeout(timeoutId);
-                
-                // Check for HTTP errors
-                if (!response.ok) {
-                    // Skip 4xx and 5xx errors, try next proxy
-                    continue;
+            // Retry each proxy if it fails
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const proxyUrl = proxy.url + encodeURIComponent(url);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeout);
+                    
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                        signal: controller.signal,
+                        mode: 'cors'
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    // Check for HTTP errors
+                    if (!response.ok) {
+                        // Skip 4xx and 5xx errors on last attempt, try next proxy
+                        if (attempt === retries) {
+                            break; // Move to next proxy
+                        }
+                        // Otherwise, retry with exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+                        continue;
+                    }
+                    
+                    // Try to parse as JSON first, fallback to text
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const data = await response.json();
+                        if (data) return { data, source: proxy.name };
+                    } else {
+                        // Return as text (for HTML scraping)
+                        const text = await response.text();
+                        if (text) return { data: text, source: proxy.name };
+                    }
+                } catch (proxyError) {
+                    // On timeout or network error, retry with exponential backoff
+                    if (attempt < retries && (proxyError.name === 'AbortError' || proxyError.name === 'TypeError')) {
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+                        continue;
+                    }
+                    // Last attempt failed, try next proxy
+                    break;
                 }
-                
-                // Try to parse as JSON first, fallback to text
-                const contentType = response.headers.get('content-type') || '';
-                if (contentType.includes('application/json')) {
-                    const data = await response.json();
-                    if (data) return data;
-                } else {
-                    // Return as text (for HTML scraping)
-                    const text = await response.text();
-                    if (text) return text;
-                }
-            } catch (proxyError) {
-                // Silently try next proxy - errors are expected when proxies are down
-                // Only continue to next proxy, don't log
-                if (proxyError.name === 'AbortError') {
-                    // Timeout - try next proxy
-                    continue;
-                }
-                // Network/CORS error - try next proxy
-                continue;
             }
         }
         
@@ -480,13 +582,16 @@ async function fetchWithProxy(url, timeout = 5000) {
 async function fetchFREDData(seriesId) {
     try {
         const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-        const data = await fetchWithProxy(url, 4000); // Shorter timeout for FRED
+        const result = await fetchWithProxy(url, 4000); // Shorter timeout for FRED
         
-        if (data && data.observations && data.observations.length > 0) {
-            const latest = data.observations[0];
-            // FRED uses '.' for missing data
-            if (latest.value !== '.' && latest.value !== null) {
-                return parseFloat(latest.value);
+        if (result && result.data) {
+            const data = result.data;
+            if (data.observations && data.observations.length > 0) {
+                const latest = data.observations[0];
+                // FRED uses '.' for missing data
+                if (latest.value !== '.' && latest.value !== null) {
+                    return parseFloat(latest.value);
+                }
             }
         }
         return null;
@@ -623,6 +728,9 @@ async function fetchFearGreedIndex() {
             updateFearGreedDisplay(value, classification);
             updateTimestamp('fear-greed-updated');
             
+            // Track success
+            trackAPISuccess();
+            
             return value;
         } else {
             debugLog('✗ fear_and_greed object not found in response', 'error');
@@ -632,6 +740,13 @@ async function fetchFearGreedIndex() {
     } catch (error) {
         debugLog(`✗ Fetch failed: ${error.message}`, 'error');
         console.error('Fear & Greed Index fetch error:', error);
+        
+        // Track failure
+        trackAPIFailure();
+        
+        // Show user-friendly error notification
+        const errorMsg = getUserFriendlyErrorMessage(error, 'Fear & Greed Index');
+        showNotification(errorMsg, 'warning', 4000);
     }
     
     // Fallback: Use cached or estimated value
@@ -653,6 +768,7 @@ async function fetchFearGreedIndex() {
     const classification = getClassificationFromValue(fallbackValue);
     updateFearGreedDisplay(fallbackValue, classification + ' (Estimated)');
     document.getElementById('fear-greed-updated').textContent = 'Last updated: API unavailable - showing estimated value';
+    showNotification('⚠️ Using estimated data - API unavailable', 'warning', 4000);
     return fallbackValue;
 }
 
@@ -690,6 +806,10 @@ async function fetchCryptoFearGreedIndex() {
         
     } catch (error) {
         console.error('Crypto Fear & Greed Index fetch error:', error);
+        
+        // Show user-friendly error notification
+        const errorMsg = getUserFriendlyErrorMessage(error, 'Crypto Fear & Greed');
+        showNotification(errorMsg, 'warning', 4000);
         
         // Fallback: Use cached value
         const cachedValue = getPreviousValue('cryptoFearGreed');
@@ -744,6 +864,450 @@ function updateCryptoFearGreedDisplay(value, classification) {
 }
 
 // ===========================
+// SOCIAL SENTIMENT FUNCTIONS (Reddit/Twitter via Apify)
+// ===========================
+
+// Sentiment keywords for analysis
+const BULLISH_KEYWORDS = [
+    'bull', 'bullish', 'moon', 'mooning', 'calls', 'buy', 'buying', 'long',
+    'rally', 'green', 'pump', 'rocket', 'tendies', 'gains', 'up', 'higher',
+    'breakout', 'ath', 'all time high', 'diamond hands', 'hodl', 'btfd',
+    'buy the dip', 'going up', 'undervalued', 'cheap', 'opportunity'
+];
+
+const BEARISH_KEYWORDS = [
+    'bear', 'bearish', 'puts', 'sell', 'selling', 'short', 'crash', 'dump',
+    'red', 'down', 'lower', 'recession', 'collapse', 'bubble', 'overvalued',
+    'panic', 'fear', 'correction', 'pullback', 'drop', 'plunge', 'tank',
+    'bagholding', 'loss', 'rip', 'dead', 'rug pull', 'scam'
+];
+
+// Analyze text for sentiment
+function analyzeSentiment(text) {
+    const lowerText = text.toLowerCase();
+    let bullishScore = 0;
+    let bearishScore = 0;
+    
+    BULLISH_KEYWORDS.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        const matches = lowerText.match(regex);
+        if (matches) bullishScore += matches.length;
+    });
+    
+    BEARISH_KEYWORDS.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        const matches = lowerText.match(regex);
+        if (matches) bearishScore += matches.length;
+    });
+    
+    return { bullishScore, bearishScore };
+}
+
+// Fetch Social Sentiment from Reddit
+// Strategy: Use Apify first (reliable), fall back to Reddit JSON API
+async function fetchSocialSentiment() {
+    console.log('📊 Fetching Reddit sentiment...');
+    
+    let allPosts = [];
+    let dataSource = 'Unknown';
+    
+    // STRATEGY 1: Use Apify as PRIMARY method (most reliable)
+    if (APIFY_TOKEN) {
+        console.log('📡 Using Apify Reddit scraper (primary)...');
+        try {
+            const apifyPosts = await fetchRedditViaApify();
+            if (apifyPosts && apifyPosts.length > 0) {
+                allPosts = apifyPosts;
+                dataSource = 'Apify';
+                console.log(`   ✓ Apify returned ${apifyPosts.length} posts`);
+            } else {
+                console.warn('   ⚠️ Apify returned no posts');
+            }
+        } catch (e) {
+            console.error('   ✗ Apify failed:', e.message);
+        }
+    } else {
+        console.warn('⚠️ No Apify token - add it to config.local.js');
+    }
+    
+    // STRATEGY 2: Fall back to Reddit's public JSON API
+    if (allPosts.length === 0) {
+        console.log('📡 Trying Reddit public API (fallback)...');
+        const subreddits = ['wallstreetbets', 'stocks', 'investing'];
+        
+        for (const subreddit of subreddits) {
+            try {
+                const redditUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=25&raw_json=1`;
+                const response = await fetch(CORS_PROXY + encodeURIComponent(redditUrl));
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const posts = data?.data?.children?.map(child => child.data) || [];
+                    allPosts = allPosts.concat(posts);
+                    dataSource = 'Reddit API';
+                    console.log(`   ✓ r/${subreddit}: ${posts.length} posts`);
+                }
+            } catch (e) {
+                console.warn(`   ✗ r/${subreddit}: ${e.message}`);
+            }
+        }
+    }
+    
+    console.log(`📥 Total: ${allPosts.length} posts from ${dataSource}`);
+    
+    if (allPosts.length === 0) {
+        console.warn('⚠️ No posts retrieved from any source');
+        return useFallbackSocialSentiment('API Unavailable');
+    }
+    
+    // Analyze sentiment from posts
+    let totalBullish = 0;
+    let totalBearish = 0;
+    
+    allPosts.forEach(post => {
+        const text = `${post.title || ''} ${post.selftext || ''}`;
+        const { bullishScore, bearishScore } = analyzeSentiment(text);
+        
+        // Weight by engagement (upvotes + comments)
+        const upvotes = post.score || post.ups || 1;
+        const comments = post.num_comments || 0;
+        const engagement = Math.log(upvotes + comments + 1);
+        
+        totalBullish += bullishScore * engagement;
+        totalBearish += bearishScore * engagement;
+    });
+    
+    // Calculate sentiment score (0-100, where 50 is neutral)
+    const totalSentiment = totalBullish + totalBearish;
+    let sentimentValue;
+    
+    if (totalSentiment === 0) {
+        sentimentValue = 50; // Neutral if no keywords found
+    } else {
+        const bullishRatio = totalBullish / totalSentiment;
+        sentimentValue = Math.round(bullishRatio * 100);
+    }
+    
+    // Clamp to 0-100
+    sentimentValue = Math.max(0, Math.min(100, sentimentValue));
+    
+    // Get classification with source indicator
+    const classification = getSocialSentimentClassification(sentimentValue);
+    
+    // Save to cache
+    savePreviousValue('socialSentiment', sentimentValue);
+    
+    // Update display
+    updateSocialSentimentDisplay(sentimentValue, classification, dataSource);
+    
+    console.log(`✅ Reddit Sentiment: ${sentimentValue}% (${classification}) via ${dataSource}`);
+    console.log(`   Bullish keywords: ${totalBullish.toFixed(1)}, Bearish: ${totalBearish.toFixed(1)}`);
+    
+    return sentimentValue;
+}
+
+// Fetch Reddit posts via Apify
+// Actor IDs use URL encoding: username/actorName -> username%2FactorName
+async function fetchRedditViaApify() {
+    if (!APIFY_TOKEN) {
+        throw new Error('No Apify token configured');
+    }
+    
+    // Try multiple actors in order of reliability
+    const actors = [
+        {
+            // scrapio/reddit-posts-scraper - Simple and reliable
+            id: 'scrapio/reddit-posts-scraper',
+            input: {
+                subreddits: ['wallstreetbets', 'stocks', 'investing'],
+                sort: 'hot',
+                maxItems: 75
+            }
+        },
+        {
+            // jupri/reddit - All-in-one Reddit scraper (highly rated)
+            id: 'jupri/reddit',
+            input: {
+                startUrls: [
+                    { url: 'https://www.reddit.com/r/wallstreetbets/hot/' },
+                    { url: 'https://www.reddit.com/r/stocks/hot/' },
+                    { url: 'https://www.reddit.com/r/investing/hot/' }
+                ],
+                maxItems: 75
+            }
+        },
+        {
+            // trudax/reddit-scraper-lite - Pay per result
+            id: 'trudax/reddit-scraper-lite',
+            input: {
+                startUrls: [
+                    { url: 'https://www.reddit.com/r/wallstreetbets/hot/' },
+                    { url: 'https://www.reddit.com/r/stocks/hot/' },
+                    { url: 'https://www.reddit.com/r/investing/hot/' }
+                ],
+                maxItems: 50,
+                proxy: { useApifyProxy: true }
+            }
+        }
+    ];
+    
+    for (const actor of actors) {
+        try {
+            // URL encode the actor ID (/ becomes %2F)
+            const encodedId = encodeURIComponent(actor.id);
+            const url = `https://api.apify.com/v2/acts/${encodedId}/run-sync-get-dataset-items?timeout=120`;
+            
+            console.log(`   Trying actor: ${actor.id}`);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${APIFY_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(actor.input),
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                console.warn(`   Actor ${actor.id} failed: HTTP ${response.status} - ${errorText.substring(0, 100)}`);
+                continue; // Try next actor
+            }
+            
+            const posts = await response.json();
+            
+            if (posts && posts.length > 0) {
+                console.log(`   ✓ ${actor.id} returned ${posts.length} items`);
+                
+                // Normalize post format for different actor outputs
+                return posts.map(post => ({
+                    title: post.title || post.postTitle || post.name || '',
+                    selftext: post.selftext || post.text || post.body || post.selfText || post.content || '',
+                    score: post.score || post.upvotes || post.ups || post.upVotes || 0,
+                    num_comments: post.numComments || post.num_comments || post.comments || post.commentCount || post.numberOfComments || 0
+                }));
+            } else {
+                console.warn(`   Actor ${actor.id} returned empty results`);
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.warn(`   Actor ${actor.id} timed out`);
+            } else {
+                console.warn(`   Actor ${actor.id} error: ${error.message}`);
+            }
+        }
+    }
+    
+    throw new Error('All Apify actors failed');
+}
+
+// Initialize social sentiment with placeholder (manual load only)
+function initSocialSentimentPlaceholder() {
+    // Hide skeletons and show placeholder state
+    hideSkeletonShowContent('social-sentiment-skeleton', 'social-sentiment-value');
+    hideSkeletonShowContent('social-sentiment-change-skeleton', 'social-sentiment-change');
+    
+    const valueEl = document.getElementById('social-sentiment-value');
+    const labelEl = document.getElementById('social-sentiment-label');
+    const changeEl = document.getElementById('social-sentiment-change');
+    const bar = document.getElementById('social-sentiment-bar');
+    const marker = document.getElementById('social-sentiment-marker');
+    
+    // Check for cached value (seed with 61 if never set - last known value)
+    let cachedValue = getPreviousValue('socialSentiment');
+    if (cachedValue === null || isNaN(cachedValue)) {
+        // Seed with last known value so users see something meaningful
+        cachedValue = 61;
+        savePreviousValue('socialSentiment', cachedValue);
+        console.log('📊 Social Sentiment: Seeded with default value:', cachedValue);
+    } else {
+        console.log('📊 Social Sentiment cached value:', cachedValue);
+    }
+    
+    if (cachedValue !== null && !isNaN(cachedValue)) {
+        // Show cached value
+        valueEl.textContent = cachedValue;
+        valueEl.style.cursor = 'pointer';
+        valueEl.style.opacity = '0.8';
+        valueEl.title = 'Click to refresh (uses Apify credits)';
+        
+        const classification = getSocialSentimentClassification(cachedValue);
+        labelEl.textContent = `${classification} (Cached)`;
+        labelEl.style.fontSize = '0.85rem';
+        
+        // Cost notice - show in both states
+        if (changeEl) {
+            changeEl.innerHTML = '<span style="cursor:pointer; font-size: 1rem; font-weight: 500;">⟳ Click to refresh</span><br><small style="opacity:0.7; font-size: 0.7rem;">Uses API credits</small>';
+            changeEl.style.opacity = '0.85';
+            changeEl.style.lineHeight = '1.6';
+        }
+        
+        // Set bar to cached value position
+        if (bar && marker) {
+            bar.style.width = `${cachedValue}%`;
+            marker.style.left = `${cachedValue}%`;
+            // Use muted colors to indicate cached
+            if (cachedValue <= 20) {
+                bar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+            } else if (cachedValue <= 40) {
+                bar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
+            } else if (cachedValue <= 60) {
+                bar.style.background = 'linear-gradient(90deg, #eab308, #facc15)';
+            } else if (cachedValue <= 80) {
+                bar.style.background = 'linear-gradient(90deg, #84cc16, #a3e635)';
+            } else {
+                bar.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+            }
+            bar.style.opacity = '0.6';
+        }
+    } else {
+        // No cached value - show placeholder
+        valueEl.textContent = '--';
+        valueEl.style.cursor = 'pointer';
+        valueEl.style.opacity = '0.7';
+        valueEl.title = 'Click to load Reddit sentiment (uses Apify credits)';
+        
+        labelEl.textContent = 'Click to load';
+        labelEl.style.fontSize = '0.85rem';
+        
+        // Cost notice - show in both states  
+        if (changeEl) {
+            changeEl.innerHTML = '<small style="opacity:0.8">⚠️ Uses API credits</small>';
+            changeEl.style.fontSize = '0.75rem';
+            changeEl.style.opacity = '0.8';
+        }
+        
+        // Set bar to neutral/disabled position
+        if (bar && marker) {
+            bar.style.width = '50%';
+            marker.style.left = '50%';
+            bar.style.background = 'linear-gradient(90deg, #6b7280, #9ca3af)';
+        }
+    }
+    
+    // Make clicking the value OR the change text trigger the load/refresh
+    const triggerLoad = async function loadSentiment() {
+        valueEl.removeEventListener('click', loadSentiment);
+        if (changeEl) changeEl.removeEventListener('click', loadSentiment);
+        valueEl.style.cursor = 'default';
+        valueEl.style.opacity = '1';
+        const previousValue = valueEl.textContent;
+        valueEl.textContent = '⏳';
+        labelEl.textContent = 'Loading...';
+        if (changeEl) changeEl.textContent = 'Fetching from Reddit...';
+        if (bar) bar.style.opacity = '1';
+        
+        try {
+            await fetchSocialSentiment();
+        } catch (error) {
+            // Restore previous state on failure
+            valueEl.textContent = previousValue !== '⏳' ? previousValue : '❌';
+            labelEl.textContent = 'Failed - click to retry';
+            if (changeEl) changeEl.innerHTML = '<small style="opacity:0.8">⚠️ Uses API credits</small>';
+            valueEl.style.cursor = 'pointer';
+            valueEl.style.opacity = '0.7';
+            valueEl.addEventListener('click', triggerLoad);
+            if (changeEl) changeEl.addEventListener('click', triggerLoad);
+        }
+    };
+    
+    valueEl.addEventListener('click', triggerLoad);
+    if (changeEl) {
+        changeEl.style.cursor = 'pointer';
+        changeEl.addEventListener('click', triggerLoad);
+    }
+}
+
+// Fallback for social sentiment when API fails
+function useFallbackSocialSentiment(reason = 'Offline') {
+    const cachedValue = getPreviousValue('socialSentiment');
+    if (cachedValue !== null && !isNaN(cachedValue)) {
+        const classification = getSocialSentimentClassification(cachedValue);
+        updateSocialSentimentDisplay(cachedValue, `${classification} (Cached)`);
+        console.log(`📦 Using cached Reddit sentiment: ${cachedValue}%`);
+        return cachedValue;
+    }
+    
+    // Last resort: neutral estimate with reason
+    const fallbackValue = 50;
+    updateSocialSentimentDisplay(fallbackValue, reason);
+    return fallbackValue;
+}
+
+// Get classification for social sentiment
+function getSocialSentimentClassification(value) {
+    if (value <= 20) return 'Extreme Bearish';
+    if (value <= 40) return 'Bearish';
+    if (value <= 60) return 'Neutral';
+    if (value <= 80) return 'Bullish';
+    return 'Extreme Bullish';
+}
+
+// Update Social Sentiment display
+function updateSocialSentimentDisplay(value, classification, dataSource = null) {
+    // Hide skeletons and show content
+    hideSkeletonShowContent('social-sentiment-skeleton', 'social-sentiment-value');
+    hideSkeletonShowContent('social-sentiment-change-skeleton', 'social-sentiment-change');
+    
+    document.getElementById('social-sentiment-value').textContent = value;
+    
+    // Show classification with optional source indicator
+    const labelEl = document.getElementById('social-sentiment-label');
+    if (dataSource && dataSource !== 'Unknown') {
+        labelEl.textContent = classification;
+        labelEl.title = `Source: ${dataSource}`;
+    } else {
+        labelEl.textContent = classification;
+    }
+    
+    // Update bar position
+    const bar = document.getElementById('social-sentiment-bar');
+    const marker = document.getElementById('social-sentiment-marker');
+    if (bar && marker) {
+        bar.style.width = `${value}%`;
+        marker.style.left = `${value}%`;
+        
+        // Set color based on value (bearish = red, bullish = green)
+        if (value <= 20) {
+            bar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+        } else if (value <= 40) {
+            bar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
+        } else if (value <= 60) {
+            bar.style.background = 'linear-gradient(90deg, #eab308, #fbbf24)';
+        } else if (value <= 80) {
+            bar.style.background = 'linear-gradient(90deg, #84cc16, #a3e635)';
+        } else {
+            bar.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+        }
+    }
+    
+    // Calculate and display change
+    const previousValue = getPreviousValue('socialSentiment');
+    const changeEl = document.getElementById('social-sentiment-change');
+    if (changeEl && previousValue !== null && !isNaN(previousValue)) {
+        const change = value - previousValue;
+        if (change > 0) {
+            changeEl.textContent = `+${change} points`;
+            changeEl.className = 'gauge-change positive';
+        } else if (change < 0) {
+            changeEl.textContent = `${change} points`;
+            changeEl.className = 'gauge-change negative';
+        } else {
+            changeEl.textContent = 'No change';
+            changeEl.className = 'gauge-change neutral';
+        }
+    } else {
+        changeEl.textContent = '--';
+    }
+}
+
+// ===========================
 // VIX (VOLATILITY INDEX) FUNCTIONS
 // ===========================
 
@@ -793,6 +1357,8 @@ async function fetchVIX() {
     } catch (error) {
         console.error('VIX fetch error:', error);
         
+        // Show warning but don't alarm user yet - we have fallback options
+        
         // Try CORS proxy fallback
         try {
             const proxyUrl = `${YAHOO_FINANCE_CORS_PROXY}${encodeURIComponent(YAHOO_FINANCE_QUOTE_API + VIX_SYMBOL)}`;
@@ -818,6 +1384,8 @@ async function fetchVIX() {
             }
         } catch (proxyError) {
             console.error('VIX proxy fetch error:', proxyError);
+            const errorMsg = getUserFriendlyErrorMessage(proxyError, 'VIX');
+            showNotification(errorMsg, 'warning', 4000);
         }
         
         // Fallback: Use cached value
@@ -886,12 +1454,108 @@ function addToHistory(indexId, value) {
     }
 }
 
-// Draw sparkline chart
+// Debounce helper for performance optimization
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Request queue manager to prevent overwhelming APIs
+class RequestQueue {
+    constructor(maxConcurrent = 3, minDelay = 100) {
+        this.maxConcurrent = maxConcurrent;
+        this.minDelay = minDelay;
+        this.queue = [];
+        this.active = 0;
+        this.lastRequestTime = 0;
+    }
+    
+    async add(fn) {
+        return new Promise((resolve, reject) => {
+            this.queue.push({ fn, resolve, reject });
+            this.process();
+        });
+    }
+    
+    async process() {
+        if (this.active >= this.maxConcurrent || this.queue.length === 0) {
+            return;
+        }
+        
+        // Enforce minimum delay between requests
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+        if (timeSinceLastRequest < this.minDelay) {
+            setTimeout(() => this.process(), this.minDelay - timeSinceLastRequest);
+            return;
+        }
+        
+        const { fn, resolve, reject } = this.queue.shift();
+        this.active++;
+        this.lastRequestTime = Date.now();
+        
+        try {
+            const result = await fn();
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        } finally {
+            this.active--;
+            this.process(); // Process next in queue
+        }
+    }
+}
+
+// Global request queue instance
+const apiRequestQueue = new RequestQueue(3, 100);
+
+// Connection status tracking
+let apiFailureCount = 0;
+let lastSuccessfulFetch = Date.now();
+
+function trackAPISuccess() {
+    apiFailureCount = 0;
+    lastSuccessfulFetch = Date.now();
+}
+
+function trackAPIFailure() {
+    apiFailureCount++;
+    
+    // Show warning if multiple failures
+    if (apiFailureCount >= 3) {
+        showNotification('⚠️ Multiple API failures detected. Using cached data.', 'warning', 5000);
+    }
+    
+    // Show critical warning if no successful fetch in 5 minutes
+    const timeSinceSuccess = Date.now() - lastSuccessfulFetch;
+    if (timeSinceSuccess > 300000) { // 5 minutes
+        showNotification('❌ Unable to connect to data sources. Check your internet connection.', 'error', 7000);
+    }
+}
+
+// Chart rendering cache to avoid re-rendering same data
+const chartRenderCache = new Map();
+
+// Draw sparkline chart (optimized)
 function drawSparkline(canvasId, data, color = '#667eea') {
     const canvas = document.getElementById(canvasId);
     if (!canvas || !data || data.length < 2) return;
     
-    const ctx = canvas.getContext('2d');
+    // Check cache to avoid unnecessary re-renders
+    const cacheKey = `${canvasId}-${data.length}-${data[data.length - 1]}-${color}`;
+    if (chartRenderCache.get(canvasId) === cacheKey) {
+        return; // Same data, skip rendering
+    }
+    chartRenderCache.set(canvasId, cacheKey);
+    
+    const ctx = canvas.getContext('2d'); // Need alpha for transparency
     const width = canvas.width;
     const height = canvas.height;
     const padding = 2;
@@ -907,20 +1571,24 @@ function drawSparkline(canvasId, data, color = '#667eea') {
     // Draw line
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round'; // Smoother line endings
+    ctx.lineJoin = 'round'; // Smoother line joins
     ctx.beginPath();
     
+    // Use Path2D for better performance
+    const path = new Path2D();
     data.forEach((value, index) => {
         const x = padding + (index / (data.length - 1)) * (width - padding * 2);
         const y = height - padding - ((value - min) / range) * (height - padding * 2);
         
         if (index === 0) {
-            ctx.moveTo(x, y);
+            path.moveTo(x, y);
         } else {
-            ctx.lineTo(x, y);
+            path.lineTo(x, y);
         }
     });
     
-    ctx.stroke();
+    ctx.stroke(path);
     
     // Draw current point
     if (data.length > 0) {
@@ -932,6 +1600,9 @@ function drawSparkline(canvasId, data, color = '#667eea') {
         ctx.fill();
     }
 }
+
+// Debounced version for batch updates
+const drawSparklineDebounced = debounce(drawSparkline, 100);
 
 // Update Fear & Greed Bar Position
 function updateFearGreedBar(value) {
@@ -1616,25 +2287,38 @@ function normalizeIndex(indexId, rawValue) {
 
 // Get Sentiment based on average score
 // Fetch Stock Index Data - using Alpha Vantage free API (CORS-friendly)
-async function fetchStockIndex(config, name) {
+async function fetchStockIndex(config, name, retries = 2) {
     // Multi-source strategy for maximum reliability
     // Priority: Yahoo Finance → Finnhub → Mock Data
     
     // Method 1: Try direct Yahoo Finance API (sometimes works without CORS issues)
-    try {
-        const yahooUrl = `${YAHOO_FINANCE_QUOTE_API}${config.symbol}?interval=1d&range=1d`;
-        const directResponse = await fetch(yahooUrl);
-        
-        if (directResponse.ok) {
-            const data = await directResponse.json();
-            const result = extractYahooFinanceData(data, config.symbol);
-            if (result) {
-                console.log(`✓ Yahoo Finance (direct) success for ${config.symbol}`);
-                return result;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const yahooUrl = `${YAHOO_FINANCE_QUOTE_API}${config.symbol}?interval=1d&range=1d`;
+            const directResponse = await fetch(yahooUrl);
+            
+            if (directResponse.ok) {
+                const data = await directResponse.json();
+                const result = extractYahooFinanceData(data, config.symbol);
+                if (result) {
+                    console.log(`✓ Yahoo Finance (direct) success for ${config.symbol}`);
+                    return result;
+                }
             }
+            
+            // If response not OK and we have retries left, wait and retry
+            if (!directResponse.ok && attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+                continue;
+            }
+        } catch (directError) {
+            // CORS blocked or network error
+            if (attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+                continue;
+            }
+            // All attempts failed, continue to next method
         }
-    } catch (directError) {
-        // CORS blocked or network error, continue to next method
     }
     
     // Method 2: Use CORS proxy for Yahoo Finance
@@ -1860,6 +2544,7 @@ async function initDashboard() {
     // Show loading state
     document.getElementById('fear-greed-label').textContent = 'Loading...';
     document.getElementById('crypto-fear-greed-label').textContent = 'Loading...';
+    document.getElementById('social-sentiment-label').textContent = 'Loading...';
     document.getElementById('vix-label').textContent = 'Loading...';
     
     // Load main content first (faster)
@@ -1873,6 +2558,10 @@ async function initDashboard() {
     } catch (error) {
         // Silently handle errors - fallbacks are in place
     }
+    
+    // Social sentiment: Manual only (click refresh button to load)
+    // This saves Apify credits - no automatic fetch on page load
+    initSocialSentimentPlaceholder();
     
     // Load stock indices asynchronously (don't block main content)
     // Use Promise.allSettled to continue even if some fail
@@ -1895,6 +2584,167 @@ async function initDashboard() {
             // Silently handle refresh errors
         }
     }, 300000); // 5 minutes
+    
+    // Initialize tab navigation
+    initMainTabs();
+}
+
+// =============================================================================
+// MAIN CONTENT TAB NAVIGATION
+// =============================================================================
+
+function initMainTabs() {
+    const tabs = document.querySelectorAll('.main-tab');
+    const panels = document.querySelectorAll('.tab-panel');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetId = tab.getAttribute('data-tab');
+            
+            // Update active states
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+    
+    // Set up refresh button for News tab
+    const refreshNewsBtn = document.getElementById('refresh-news');
+    
+    if (refreshNewsBtn) {
+        refreshNewsBtn.addEventListener('click', async () => {
+            refreshNewsBtn.disabled = true;
+            refreshNewsBtn.textContent = '⏳';
+            try {
+                await fetchFinancialNews();
+                updateTimestamp('news-updated');
+            } catch (error) {
+                console.error('Failed to fetch news:', error);
+                showNotification('❌ Failed to load news', 'error', 3000);
+            } finally {
+                refreshNewsBtn.disabled = false;
+                refreshNewsBtn.textContent = '🔄';
+            }
+        });
+    }
+}
+
+// =============================================================================
+// FINANCIAL NEWS (via Apify)
+// =============================================================================
+
+async function fetchFinancialNews() {
+    if (!APIFY_TOKEN) {
+        showNotification('⚠️ Apify token required for news', 'warning', 3000);
+        return;
+    }
+    
+    console.log('📰 Fetching financial news...');
+    
+    const container = document.getElementById('news-container');
+    container.innerHTML = '<div class="news-placeholder"><div class="placeholder-icon">⏳</div><div class="placeholder-text">Loading news...</div></div>';
+    
+    // Try multiple actors in order
+    const newsActors = [
+        {
+            id: 'lhotanova/google-news-scraper',
+            input: { keyword: 'stock market financial news' }
+        },
+        {
+            id: 'saswave/google-news-scraper', 
+            input: { 
+                searchQuery: 'stock market',
+                maxResults: 15
+            }
+        },
+        {
+            id: 'scrapio/google-news-scraper',
+            input: {
+                query: 'stock market',
+                maxItems: 15
+            }
+        }
+    ];
+    
+    for (const actor of newsActors) {
+        try {
+            console.log(`   Trying news actor: ${actor.id}`);
+            const encodedId = encodeURIComponent(actor.id);
+            const url = `https://api.apify.com/v2/acts/${encodedId}/run-sync-get-dataset-items?timeout=90`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${APIFY_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(actor.input)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => '');
+                console.warn(`   Actor ${actor.id} failed: HTTP ${response.status} - ${errorText.substring(0, 100)}`);
+                continue;
+            }
+            
+            const news = await response.json();
+            console.log(`   ✓ ${actor.id} returned ${news?.length || 0} articles`);
+            
+            if (!news || news.length === 0) {
+                continue;
+            }
+            
+            // Render news cards (handle different output formats)
+            container.innerHTML = news.slice(0, 15).map(article => `
+                <a href="${article.link || article.url || article.articleUrl || '#'}" target="_blank" rel="noopener" class="news-card">
+                    ${(article.image || article.imageUrl || article.thumbnail) ? `<img src="${article.image || article.imageUrl || article.thumbnail}" alt="" class="news-card-image" onerror="this.style.display='none'">` : ''}
+                    <div class="news-card-content">
+                        <div class="news-card-title">${escapeHtml(article.title || article.headline || 'Untitled')}</div>
+                        <div class="news-card-meta">
+                            <span class="news-card-source">${escapeHtml(article.source || article.publisher || article.siteName || 'Unknown')}</span>
+                            <span class="news-card-time">${escapeHtml(article.date || article.publishedAt || article.time || article.pubDate || '')}</span>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+            
+            showNotification('✅ News loaded!', 'success', 2000);
+            return; // Success!
+            
+        } catch (error) {
+            console.warn(`   Actor ${actor.id} error: ${error.message}`);
+        }
+    }
+    
+    // All actors failed
+    container.innerHTML = `
+        <div class="news-placeholder">
+            <div class="placeholder-icon">❌</div>
+            <div class="placeholder-text">Failed to load news</div>
+            <div class="placeholder-subtext">All news sources unavailable. Try again later.</div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// CAPITOL TRADES / PELOSI TRACKER - DEFERRED
+// =============================================================================
+// NOTE: Capitol Trades feature has been temporarily removed due to Apify actor
+// pricing constraints. The saswave/capitol-trades-scraper requires a paid tier.
+// This feature will be revisited when a free/affordable alternative is found.
+// See TODO.txt item #41 for details.
+
+// Helper: Escape HTML to prevent XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Tooltip Management
@@ -2377,16 +3227,63 @@ function shareURL() {
     }
 }
 
+// Helper: Get user-friendly error message
+function getUserFriendlyErrorMessage(error, context = '') {
+    if (!error) return 'An unknown error occurred';
+    
+    const errorType = error.name || '';
+    const errorMessage = error.message || '';
+    
+    // CORS errors
+    if (errorMessage.includes('CORS') || errorMessage.includes('cors') || errorType === 'TypeError' && errorMessage.includes('fetch')) {
+        return `${context ? context + ': ' : ''}Network access blocked. Using cached data.`;
+    }
+    
+    // Timeout errors
+    if (errorType === 'AbortError' || errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+        return `${context ? context + ': ' : ''}Request timed out. Retrying...`;
+    }
+    
+    // HTTP errors
+    if (errorMessage.includes('HTTP error')) {
+        const statusMatch = errorMessage.match(/status: (\d+)/);
+        if (statusMatch) {
+            const status = parseInt(statusMatch[1]);
+            if (status === 429) return `${context ? context + ': ' : ''}Rate limit exceeded. Please wait.`;
+            if (status >= 500) return `${context ? context + ': ' : ''}Server error. Using cached data.`;
+            if (status === 404) return `${context ? context + ': ' : ''}Data not found. Using fallback.`;
+        }
+        return `${context ? context + ': ' : ''}API request failed. Using cached data.`;
+    }
+    
+    // JSON parse errors
+    if (errorType === 'SyntaxError' && errorMessage.includes('JSON')) {
+        return `${context ? context + ': ' : ''}Invalid data received. Using cached data.`;
+    }
+    
+    // Generic fallback
+    return `${context ? context + ': ' : ''}Unable to fetch data. Using cached data.`;
+}
+
 // Show notification toast
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
+    
+    // Color mapping for different notification types
+    const colorMap = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#667eea'
+    };
+    
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#10b981' : '#667eea'};
+        background: ${colorMap[type] || colorMap['info']};
         color: white;
         padding: 15px 25px;
         border-radius: 10px;
@@ -2394,6 +3291,8 @@ function showNotification(message, type = 'info') {
         z-index: 10001;
         font-weight: 600;
         animation: slideInRight 0.3s ease-out;
+        max-width: 400px;
+        word-wrap: break-word;
     `;
     
     document.body.appendChild(notification);
@@ -2401,7 +3300,7 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }, duration);
 }
 
 // Add notification animations to CSS dynamically
@@ -2445,9 +3344,35 @@ function generateHistoricalData(indexId, days = 30) {
     
     // Get current value or use a default
     let currentValue = 50;
-    const element = document.getElementById(`${indexId}-value`);
-    if (element && element.textContent !== '--') {
+    
+    // Try different element ID patterns based on the type of indicator
+    let element = null;
+    
+    // For stock indices (use -price)
+    if (['sp500', 'nasdaq', 'ftse100', 'dax', 'stoxx600', 'nikkei', 'shanghai', 'hangsen'].includes(indexId)) {
+        element = document.getElementById(`${indexId}-price`);
+    }
+    // For Fear & Greed indexes (special IDs)
+    else if (indexId === 'fear-greed') {
+        element = document.getElementById('fear-greed-value');
+    }
+    else if (indexId === 'crypto-fear-greed') {
+        element = document.getElementById('crypto-fear-greed-value');
+    }
+    else if (indexId === 'vix') {
+        element = document.getElementById('vix-value');
+    }
+    // For recession indicators (use -value)
+    else {
+        element = document.getElementById(`${indexId}-value`);
+    }
+    
+    if (element && element.textContent !== '--' && element.textContent.trim() !== '') {
         currentValue = parseFloat(element.textContent.replace(/[^0-9.-]/g, ''));
+        // If parsing failed or value is NaN, use default
+        if (isNaN(currentValue)) {
+            currentValue = 50;
+        }
     }
     
     // Generate realistic historical data with trends
@@ -2458,7 +3383,7 @@ function generateHistoricalData(indexId, days = 30) {
         
         // Add some randomness and trending
         const trend = (days - i) / days; // 0 to 1
-        const randomVariation = (Math.random() - 0.5) * 10;
+        const randomVariation = (Math.random() - 0.5) * (currentValue * 0.05); // 5% variation
         const value = currentValue * (0.8 + trend * 0.4) + randomVariation;
         data.push(Math.max(0, value));
     }
@@ -2523,7 +3448,7 @@ function loadChart(indexId, days) {
     gradientFill.addColorStop(0, change >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)');
     gradientFill.addColorStop(1, 'rgba(255, 255, 255, 0)');
     
-    // Create new chart
+    // Create new chart with performance optimizations
     currentChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -2547,6 +3472,9 @@ function loadChart(indexId, days) {
             responsive: true,
             maintainAspectRatio: true,
             aspectRatio: 2.5,
+            animation: {
+                duration: days > 90 ? 300 : 750 // Faster animation for large datasets
+            },
             plugins: {
                 legend: {
                     display: false
