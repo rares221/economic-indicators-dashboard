@@ -2682,7 +2682,13 @@ async function fetchAllStockIndices() {
 async function initDashboard() {
     // Initialize historical data for sparklines
     initializeHistoricalData();
-    
+
+    // Purge any stale stock-price keys that older versions may have written.
+    // Stock prices are always fetched fresh — we never need to restore them from cache.
+    Object.keys(STOCK_INDICES).forEach(key => {
+        localStorage.removeItem(`index_${key}_previous`);
+    });
+
     // Clear old cached value if it's the default 40 (force fresh fetch)
     const cachedValue = getPreviousValue('fearGreed');
     if (cachedValue === 40) {
