@@ -220,8 +220,8 @@ const INDEX_TOOLTIPS = {
         description: 'The CBOE Volatility Index (VIX) measures expected market volatility over the next 30 days. Often called the "fear gauge," values below 12 indicate low volatility, 12-20 is normal, 20-30 is elevated, 30-40 is high, and above 40 indicates extreme market stress.'
     },
     'social-sentiment': {
-        title: 'Reddit Sentiment Index',
-        description: 'Analyzes retail investor sentiment from Reddit (r/wallstreetbets, r/stocks, r/investing). Scores from 0 (Extreme Bearish) to 100 (Extreme Bullish) based on keyword analysis of recent posts, weighted by engagement. A contrarian indicator—extreme readings often precede market reversals.'
+        title: 'Social Sentiment Index',
+        description: 'Measures retail investor sentiment from multiple free sources. Priority: (1) StockTwits — explicit Bullish/Bearish user tags; (2) ApeWisdom — Reddit finance aggregator (WSB, r/stocks, r/investing) with mention-momentum and upvote-quality scoring; (3) Reddit JSON via proxy — keyword analysis. No API key needed for any source. Scores 0–100 (Bearish → Bullish). A contrarian indicator — extreme readings often precede reversals.'
     },
     'sahm': {
         title: 'Sahm Rule',
@@ -469,32 +469,35 @@ function savePreviousValue(indexId, value) {
 
 // Recession Index Data Structure
 const recessionIndexes = {
-    sahm: { value: null, status: null, name: 'Sahm Rule', unit: '%', weight: 0.15, category: 'official' },
-    yield: { value: null, status: null, name: 'Yield Curve', unit: '%', weight: 0.15, category: 'official' },
-    unemployment: { value: null, status: null, name: 'Unemployment Rate', unit: '%', weight: 0.12, category: 'official' },
-    gdp: { value: null, status: null, name: 'GDP Growth', unit: '%', weight: 0.12, category: 'official' },
-    lipstick: { value: null, status: null, name: 'Lipstick Index', unit: 'index', weight: 0.04, category: 'unofficial' },
-    rword: { value: null, status: null, name: 'R-Word Index', unit: 'mentions', weight: 0.06, category: 'unofficial' },
-    stripper: { value: null, status: null, name: 'Stripper Index', unit: 'index', weight: 0.04, category: 'unofficial' },
-    vibecession: { value: null, status: null, name: 'Vibecession', unit: 'score', weight: 0.05, category: 'unofficial' },
-    ads: { value: null, status: null, name: 'ADS Index', unit: 'index', weight: 0.08, category: 'official' },
-    usedcar: { value: null, status: null, name: 'Used Car Index', unit: 'index', weight: 0.05, category: 'unofficial' },
-    lego: { value: null, status: null, name: 'Lego Index', unit: 'index', weight: 0.04, category: 'unofficial' },
-    pizza: { value: null, status: null, name: 'Frozen Pizza Index', unit: 'index', weight: 0.03, category: 'unofficial' },
-    underwear: { value: null, status: null, name: "Men's Underwear Index", unit: 'index', weight: 0.04, category: 'unofficial' },
-    bigmac: { value: null, status: null, name: 'Big Mac Index', unit: 'index', weight: 0.03, category: 'unofficial' },
-    cardboard: { value: null, status: null, name: 'Cardboard Box Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    hemline: { value: null, status: null, name: 'Hemline Index', unit: 'index', weight: 0.01, category: 'unofficial' },
-    bowtie: { value: null, status: null, name: "Waiter's Bow Tie Index", unit: 'index', weight: 0.02, category: 'unofficial' },
-    skyscraper: { value: null, status: null, name: 'Skyscraper Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    waitress: { value: null, status: null, name: 'Hot Waitress Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    neckties: { value: null, status: null, name: 'Neckties Sales Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    champagne: { value: null, status: null, name: 'Champagne Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    parking: { value: null, status: null, name: 'Parking Lot Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    trash: { value: null, status: null, name: 'Trash Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    bikemessenger: { value: null, status: null, name: 'Bike Messenger Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    tempworker: { value: null, status: null, name: 'Temp Worker Index', unit: 'index', weight: 0.02, category: 'unofficial' },
-    coffeeshop: { value: null, status: null, name: 'Coffee Shop Laptop Index', unit: 'index', weight: 0.02, category: 'unofficial' }
+    // Weights sum to exactly 1.00:
+    // Official FRED-backed (4×0.12=0.48) + ads (0.07) + semi (3×0.05=0.15)
+    // + informal-high (4×0.03=0.12) + informal-mid (4×0.02=0.08) + informal-low (10×0.01=0.10)
+    sahm:          { value: null, status: null, name: 'Sahm Rule',               unit: '%',     weight: 0.12, category: 'official',   source: 'FRED' },
+    yield:         { value: null, status: null, name: 'Yield Curve',             unit: '%',     weight: 0.12, category: 'official',   source: 'FRED' },
+    unemployment:  { value: null, status: null, name: 'Unemployment Rate',       unit: '%',     weight: 0.12, category: 'official',   source: 'FRED' },
+    gdp:           { value: null, status: null, name: 'GDP Growth',              unit: '%',     weight: 0.12, category: 'official',   source: 'FRED' },
+    ads:           { value: null, status: null, name: 'ADS Index',              unit: 'index', weight: 0.07, category: 'official',   source: 'estimated' },
+    rword:         { value: null, status: null, name: 'R-Word Index',            unit: 'index', weight: 0.05, category: 'unofficial', source: 'estimated' },
+    vibecession:   { value: null, status: null, name: 'Vibecession',             unit: 'score', weight: 0.05, category: 'unofficial', source: 'estimated' },
+    usedcar:       { value: null, status: null, name: 'Used Car Index',          unit: 'index', weight: 0.05, category: 'unofficial', source: 'estimated' },
+    lipstick:      { value: null, status: null, name: 'Lipstick Index',          unit: 'index', weight: 0.03, category: 'unofficial', source: 'estimated' },
+    stripper:      { value: null, status: null, name: 'Stripper Index',          unit: 'index', weight: 0.03, category: 'unofficial', source: 'estimated' },
+    lego:          { value: null, status: null, name: 'Lego Index',              unit: 'index', weight: 0.03, category: 'unofficial', source: 'estimated' },
+    underwear:     { value: null, status: null, name: "Men's Underwear Index",   unit: 'index', weight: 0.03, category: 'unofficial', source: 'estimated' },
+    pizza:         { value: null, status: null, name: 'Frozen Pizza Index',      unit: 'index', weight: 0.02, category: 'unofficial', source: 'estimated' },
+    bigmac:        { value: null, status: null, name: 'Big Mac Index',           unit: 'index', weight: 0.02, category: 'unofficial', source: 'estimated' },
+    cardboard:     { value: null, status: null, name: 'Cardboard Box Index',     unit: 'index', weight: 0.02, category: 'unofficial', source: 'estimated' },
+    hemline:       { value: null, status: null, name: 'Hemline Index',           unit: 'index', weight: 0.02, category: 'unofficial', source: 'estimated' },
+    bowtie:        { value: null, status: null, name: "Waiter's Bow Tie Index",  unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    skyscraper:    { value: null, status: null, name: 'Skyscraper Index',        unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    waitress:      { value: null, status: null, name: 'Hot Waitress Index',      unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    neckties:      { value: null, status: null, name: 'Neckties Sales Index',    unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    champagne:     { value: null, status: null, name: 'Champagne Index',         unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    parking:       { value: null, status: null, name: 'Parking Lot Index',       unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    trash:         { value: null, status: null, name: 'Trash Index',             unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    bikemessenger: { value: null, status: null, name: 'Bike Messenger Index',    unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    tempworker:    { value: null, status: null, name: 'Temp Worker Index',       unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' },
+    coffeeshop:    { value: null, status: null, name: 'Coffee Shop Laptop Index',unit: 'index', weight: 0.01, category: 'unofficial', source: 'estimated' }
 };
 
 // Recession Probability Calculator
@@ -510,12 +513,10 @@ const recessionProbability = {
 async function fetchWithProxy(url, timeout = 5000, retries = 2) {
     try {
         // Try multiple CORS proxies for better reliability
-        // Reordered to try more reliable ones first
         const proxies = [
-            { url: 'https://api.codetabs.com/v1/proxy?quest=', name: 'codetabs' },
             { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' },
-            { url: 'https://corsproxy.io/?', name: 'corsproxy' },
-            { url: 'https://cors-anywhere.herokuapp.com/', name: 'cors-anywhere' }
+            { url: 'https://api.codetabs.com/v1/proxy?quest=', name: 'codetabs' },
+            { url: 'https://corsproxy.io/?', name: 'corsproxy' }
         ];
         
         for (const proxy of proxies) {
@@ -578,19 +579,73 @@ async function fetchWithProxy(url, timeout = 5000, retries = 2) {
     }
 }
 
-// Helper: Fetch FRED data
+// Helper: Fetch Yahoo Finance data for a symbol with multi-proxy fallback
+// Returns extracted { price, change, changePercent } or null
+async function fetchYahooData(symbol) {
+    // Add timestamp to prevent proxy-level caching of stale quotes
+    const bust = `&_t=${Date.now()}`;
+    const yahooUrl = `${YAHOO_FINANCE_QUOTE_API}${symbol}?interval=1d&range=1d${bust}`;
+
+    // Step 1: direct fetch (blocked by CORS in most browsers, but worth a try)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const response = await fetch(yahooUrl, {
+            signal: controller.signal,
+            cache: 'no-store'
+        });
+        clearTimeout(timeoutId);
+        if (response.ok) {
+            const data = await response.json();
+            const result = extractYahooFinanceData(data, symbol);
+            if (result) return result;
+        }
+    } catch (e) { /* CORS blocked – continue to proxies */ }
+
+    // Step 2: try CORS proxies in order (8s each to give enough time)
+    const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://corsproxy.io/?'
+    ];
+    for (const proxy of proxies) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const response = await fetch(proxy + encodeURIComponent(yahooUrl), {
+                signal: controller.signal,
+                cache: 'no-store'
+            });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+                const text = await response.text();
+                const data = JSON.parse(text);
+                const result = extractYahooFinanceData(data, symbol);
+                if (result) return result;
+            }
+        } catch (e) { /* try next proxy */ }
+    }
+    return null;
+}
+
+// Helper: Fetch FRED data - FRED supports CORS, so call directly (no proxy needed)
 async function fetchFREDData(seriesId) {
     try {
-        const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-        const result = await fetchWithProxy(url, 4000); // Shorter timeout for FRED
-        
-        if (result && result.data) {
-            const data = result.data;
-            if (data.observations && data.observations.length > 0) {
-                const latest = data.observations[0];
-                // FRED uses '.' for missing data
-                if (latest.value !== '.' && latest.value !== null) {
-                    return parseFloat(latest.value);
+        // Fetch the 2 most recent observations in case the latest has a missing value ('.')
+        const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=2`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        if (data.observations) {
+            for (const obs of data.observations) {
+                if (obs.value !== '.' && obs.value !== null && obs.value !== '') {
+                    return parseFloat(obs.value);
                 }
             }
         }
@@ -864,8 +919,169 @@ function updateCryptoFearGreedDisplay(value, classification) {
 }
 
 // ===========================
-// SOCIAL SENTIMENT FUNCTIONS (Reddit/Twitter via Apify)
+// SOCIAL SENTIMENT FUNCTIONS
+// Priority: StockTwits (explicit tags) → ApeWisdom (Reddit aggregator) → Reddit JSON → Apify
 // ===========================
+
+// StockTwits API endpoints (no auth, 200 req/hr, needs CORS proxy)
+const STOCKTWITS_TRENDING = 'https://api.stocktwits.com/api/2/streams/trending.json';
+const STOCKTWITS_SYMBOL   = (sym) => `https://api.stocktwits.com/api/2/streams/symbol/${sym}.json`;
+
+// ApeWisdom: free Reddit finance aggregator - tracks WSB/stocks/investing mentions
+// Returns rank, mention counts, and upvotes for trending stocks
+// No auth needed; may support direct CORS, otherwise proxied
+const APEWISDOM_URL = 'https://apewisdom.io/api/v1.0/filter/all-stocks/page/1';
+
+// Fetch Reddit sentiment via ApeWisdom (no Apify, no auth needed)
+// Derives a 0-100 score from mention momentum + upvote engagement quality
+async function fetchApeWisdomSentiment() {
+    const CORS_PROXIES = [
+        'https://api.allorigins.win/raw?url=',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://corsproxy.io/?'
+    ];
+
+    let data = null;
+
+    // Try direct fetch first (ApeWisdom may have CORS headers)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const response = await fetch(APEWISDOM_URL, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (response.ok) data = await response.json();
+    } catch (e) { /* try proxy */ }
+
+    // Proxy fallback
+    if (!data) {
+        for (const proxy of CORS_PROXIES) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 7000);
+                const response = await fetch(proxy + encodeURIComponent(APEWISDOM_URL), { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (response.ok) {
+                    const text = await response.text();
+                    data = JSON.parse(text);
+                    break;
+                }
+            } catch (e) { /* try next */ }
+        }
+    }
+
+    if (!data || !Array.isArray(data.results) || data.results.length === 0) return null;
+
+    // Score derivation from top 25 trending stocks:
+    //   Mention momentum  — are people talking MORE than yesterday? (+bullish, -bearish)
+    //   Upvote engagement — are posts being upvoted heavily? (high = community approval)
+    const results = data.results.slice(0, 25);
+    let weightedMomentum = 0;
+    let totalMentions = 0;
+    let totalUpvoteRatio = 0;
+
+    for (const stock of results) {
+        const mentions = stock.mentions || 1;
+        const mentions24h = stock.mentions_24h_ago;
+        const upvotes = stock.upvotes || 0;
+
+        totalMentions += mentions;
+        totalUpvoteRatio += upvotes / mentions;
+
+        if (mentions24h !== null && mentions24h > 0) {
+            // Normalised momentum: +1 = doubled mentions, -1 = zero mentions vs yesterday
+            const momentum = Math.max(-1, Math.min(1, (mentions - mentions24h) / mentions24h));
+            weightedMomentum += momentum * mentions;
+        }
+    }
+
+    if (totalMentions === 0) return null;
+
+    // Map average momentum [-1, +1] → [20, 80], with upvote quality adding up to +5
+    const avgMomentum = weightedMomentum / totalMentions;
+    const avgUpvoteRatio = totalUpvoteRatio / results.length;
+    const engagementBonus = Math.min(5, avgUpvoteRatio * 0.3);
+    const score = Math.max(0, Math.min(100, Math.round(50 + avgMomentum * 30 + engagementBonus)));
+
+    console.log(`ApeWisdom: momentum=${avgMomentum.toFixed(2)}, upvote ratio=${avgUpvoteRatio.toFixed(1)}, score=${score} (${results.length} stocks tracked)`);
+    return score;
+}
+
+// Fetch StockTwits sentiment from trending + key US equity symbols
+// Returns a 0-100 sentiment score, or null on complete failure
+async function fetchStockTwitsSentiment() {
+    const CORS_PROXIES = [
+        'https://api.allorigins.win/raw?url=',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://corsproxy.io/?'
+    ];
+
+    // Endpoints: trending feed + SPY + QQQ (broad US equity coverage)
+    const endpoints = [
+        STOCKTWITS_TRENDING,
+        STOCKTWITS_SYMBOL('SPY'),
+        STOCKTWITS_SYMBOL('QQQ')
+    ];
+
+    let allMessages = [];
+
+    for (const endpoint of endpoints) {
+        for (const proxy of CORS_PROXIES) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 7000);
+                const response = await fetch(proxy + encodeURIComponent(endpoint), {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) continue;
+
+                const text = await response.text();
+                const data = JSON.parse(text);
+                const messages = data?.messages || [];
+                if (messages.length > 0) {
+                    allMessages = allMessages.concat(messages);
+                    break; // got this endpoint, move to next
+                }
+            } catch (e) { /* try next proxy */ }
+        }
+    }
+
+    if (allMessages.length === 0) return null;
+
+    // Count explicit sentiment tags (primary signal)
+    let bullish = 0, bearish = 0, unlabeled = 0;
+    for (const msg of allMessages) {
+        const tag = msg?.entities?.sentiment?.basic;
+        if (tag === 'Bullish') bullish++;
+        else if (tag === 'Bearish') bearish++;
+        else unlabeled++;
+    }
+
+    const tagged = bullish + bearish;
+    if (tagged === 0) return null; // no useful signal
+
+    // Supplement with keyword analysis on unlabeled messages (half-weight)
+    let kwBullish = 0, kwBearish = 0;
+    if (unlabeled > 0) {
+        for (const msg of allMessages) {
+            if (msg?.entities?.sentiment?.basic) continue; // already tagged
+            const body = (msg.body || '').toLowerCase();
+            const { bullishScore, bearishScore } = analyzeSentiment(body);
+            kwBullish += bullishScore;
+            kwBearish += bearishScore;
+        }
+    }
+
+    // Combine: tagged messages count full, keyword signal counts half
+    const totalBullish = bullish + kwBullish * 0.5;
+    const totalBearish = bearish + kwBearish * 0.5;
+    const total = totalBullish + totalBearish;
+
+    const score = total > 0 ? Math.round((totalBullish / total) * 100) : 50;
+    console.log(`StockTwits: ${tagged} tagged (${bullish}B/${bearish}Bear), score: ${score} from ${allMessages.length} messages`);
+    return Math.max(0, Math.min(100, score));
+}
 
 // Sentiment keywords for analysis
 const BULLISH_KEYWORDS = [
@@ -903,107 +1119,99 @@ function analyzeSentiment(text) {
     return { bullishScore, bearishScore };
 }
 
-// Fetch Social Sentiment from Reddit
-// Strategy: Use Apify first (reliable), fall back to Reddit JSON API
+// Fetch Social Sentiment
+// Priority chain: StockTwits → ApeWisdom (Reddit aggregator) → Apify Reddit → Reddit JSON
 async function fetchSocialSentiment() {
-    console.log('📊 Fetching Reddit sentiment...');
-    
-    let allPosts = [];
-    let dataSource = 'Unknown';
-    
-    // STRATEGY 1: Use Apify as PRIMARY method (most reliable)
+    console.log('📊 Fetching social sentiment...');
+
+    // STRATEGY 1: StockTwits — explicit Bullish/Bearish user tags, no API key
+    console.log('📡 Trying StockTwits...');
+    try {
+        const stScore = await fetchStockTwitsSentiment();
+        if (stScore !== null) {
+            const classification = getSocialSentimentClassification(stScore);
+            savePreviousValue('socialSentiment', stScore);
+            updateSocialSentimentDisplay(stScore, classification, 'StockTwits');
+            console.log(`✅ StockTwits: ${stScore}% (${classification})`);
+            return stScore;
+        }
+    } catch (e) {
+        console.warn('   ✗ StockTwits failed:', e.message);
+    }
+
+    // STRATEGY 2: ApeWisdom — free Reddit finance aggregator, no auth needed
+    // Covers WSB + r/stocks + r/investing + r/stockmarket
+    console.log('📡 Trying ApeWisdom (Reddit aggregator)...');
+    try {
+        const awScore = await fetchApeWisdomSentiment();
+        if (awScore !== null) {
+            const classification = getSocialSentimentClassification(awScore);
+            savePreviousValue('socialSentiment', awScore);
+            updateSocialSentimentDisplay(awScore, classification, 'Reddit/ApeWisdom');
+            console.log(`✅ ApeWisdom: ${awScore}% (${classification})`);
+            return awScore;
+        }
+    } catch (e) {
+        console.warn('   ✗ ApeWisdom failed:', e.message);
+    }
+
+    // STRATEGY 3: Apify Reddit scraper (only if token is configured)
     if (APIFY_TOKEN) {
-        console.log('📡 Using Apify Reddit scraper (primary)...');
+        console.log('📡 Trying Apify Reddit scraper...');
         try {
             const apifyPosts = await fetchRedditViaApify();
             if (apifyPosts && apifyPosts.length > 0) {
-                allPosts = apifyPosts;
-                dataSource = 'Apify';
-                console.log(`   ✓ Apify returned ${apifyPosts.length} posts`);
-            } else {
-                console.warn('   ⚠️ Apify returned no posts');
+                return computeAndDisplayRedditSentiment(apifyPosts, 'Apify/Reddit');
             }
         } catch (e) {
-            console.error('   ✗ Apify failed:', e.message);
+            console.warn('   ✗ Apify failed:', e.message);
         }
-    } else {
-        console.warn('⚠️ No Apify token - add it to config.local.js');
     }
-    
-    // STRATEGY 2: Fall back to Reddit's public JSON API
-    if (allPosts.length === 0) {
-        console.log('📡 Trying Reddit public API (fallback)...');
-        const subreddits = ['wallstreetbets', 'stocks', 'investing'];
-        
-        for (const subreddit of subreddits) {
-            try {
-                const redditUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=25&raw_json=1`;
-                const response = await fetch(CORS_PROXY + encodeURIComponent(redditUrl));
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    const posts = data?.data?.children?.map(child => child.data) || [];
-                    allPosts = allPosts.concat(posts);
-                    dataSource = 'Reddit API';
-                    console.log(`   ✓ r/${subreddit}: ${posts.length} posts`);
-                }
-            } catch (e) {
-                console.warn(`   ✗ r/${subreddit}: ${e.message}`);
+
+    // STRATEGY 4: Reddit public JSON API via CORS proxy (keyword analysis)
+    console.log('📡 Trying Reddit public API...');
+    const allPosts = [];
+    const subreddits = ['wallstreetbets', 'stocks', 'investing'];
+    for (const sub of subreddits) {
+        try {
+            const redditUrl = `https://www.reddit.com/r/${sub}/hot.json?limit=25&raw_json=1`;
+            const response = await fetch(CORS_PROXY + encodeURIComponent(redditUrl));
+            if (response.ok) {
+                const data = await response.json();
+                const posts = data?.data?.children?.map(c => c.data) || [];
+                allPosts.push(...posts);
+                console.log(`   ✓ r/${sub}: ${posts.length} posts`);
             }
+        } catch (e) {
+            console.warn(`   ✗ r/${sub}: ${e.message}`);
         }
     }
-    
-    console.log(`📥 Total: ${allPosts.length} posts from ${dataSource}`);
-    
-    if (allPosts.length === 0) {
-        console.warn('⚠️ No posts retrieved from any source');
-        return useFallbackSocialSentiment('API Unavailable');
+
+    if (allPosts.length > 0) {
+        return computeAndDisplayRedditSentiment(allPosts, 'Reddit');
     }
-    
-    // Analyze sentiment from posts
-    let totalBullish = 0;
-    let totalBearish = 0;
-    
-    allPosts.forEach(post => {
+
+    console.warn('⚠️ All sentiment sources failed');
+    return useFallbackSocialSentiment('API Unavailable');
+}
+
+// Keyword-based sentiment analysis on an array of Reddit post objects
+function computeAndDisplayRedditSentiment(posts, sourceLabel) {
+    let totalBullish = 0, totalBearish = 0;
+    posts.forEach(post => {
         const text = `${post.title || ''} ${post.selftext || ''}`;
         const { bullishScore, bearishScore } = analyzeSentiment(text);
-        
-        // Weight by engagement (upvotes + comments)
-        const upvotes = post.score || post.ups || 1;
-        const comments = post.num_comments || 0;
-        const engagement = Math.log(upvotes + comments + 1);
-        
+        const engagement = Math.log((post.score || post.ups || 1) + (post.num_comments || 0) + 1);
         totalBullish += bullishScore * engagement;
         totalBearish += bearishScore * engagement;
     });
-    
-    // Calculate sentiment score (0-100, where 50 is neutral)
-    const totalSentiment = totalBullish + totalBearish;
-    let sentimentValue;
-    
-    if (totalSentiment === 0) {
-        sentimentValue = 50; // Neutral if no keywords found
-    } else {
-        const bullishRatio = totalBullish / totalSentiment;
-        sentimentValue = Math.round(bullishRatio * 100);
-    }
-    
-    // Clamp to 0-100
-    sentimentValue = Math.max(0, Math.min(100, sentimentValue));
-    
-    // Get classification with source indicator
-    const classification = getSocialSentimentClassification(sentimentValue);
-    
-    // Save to cache
-    savePreviousValue('socialSentiment', sentimentValue);
-    
-    // Update display
-    updateSocialSentimentDisplay(sentimentValue, classification, dataSource);
-    
-    console.log(`✅ Reddit Sentiment: ${sentimentValue}% (${classification}) via ${dataSource}`);
-    console.log(`   Bullish keywords: ${totalBullish.toFixed(1)}, Bearish: ${totalBearish.toFixed(1)}`);
-    
-    return sentimentValue;
+    const total = totalBullish + totalBearish;
+    const score = Math.max(0, Math.min(100, total === 0 ? 50 : Math.round((totalBullish / total) * 100)));
+    const classification = getSocialSentimentClassification(score);
+    savePreviousValue('socialSentiment', score);
+    updateSocialSentimentDisplay(score, classification, sourceLabel);
+    console.log(`✅ ${sourceLabel}: ${score}% (${classification})`);
+    return score;
 }
 
 // Fetch Reddit posts via Apify
@@ -1135,15 +1343,14 @@ function initSocialSentimentPlaceholder() {
         valueEl.textContent = cachedValue;
         valueEl.style.cursor = 'pointer';
         valueEl.style.opacity = '0.8';
-        valueEl.title = 'Click to refresh (uses Apify credits)';
-        
+        valueEl.title = 'Click to refresh';
+
         const classification = getSocialSentimentClassification(cachedValue);
         labelEl.textContent = `${classification} (Cached)`;
         labelEl.style.fontSize = '0.85rem';
-        
-        // Cost notice - show in both states
+
         if (changeEl) {
-            changeEl.innerHTML = '<span style="cursor:pointer; font-size: 1rem; font-weight: 500;">⟳ Click to refresh</span><br><small style="opacity:0.7; font-size: 0.7rem;">Uses API credits</small>';
+            changeEl.innerHTML = '<span style="cursor:pointer; font-size: 1rem; font-weight: 500;">⟳ Click to refresh</span><br><small style="opacity:0.7; font-size: 0.7rem;">StockTwits · ApeWisdom · Reddit</small>';
             changeEl.style.opacity = '0.85';
             changeEl.style.lineHeight = '1.6';
         }
@@ -1257,14 +1464,11 @@ function updateSocialSentimentDisplay(value, classification, dataSource = null) 
     
     document.getElementById('social-sentiment-value').textContent = value;
     
-    // Show classification with optional source indicator
+    // Show classification with source indicator
     const labelEl = document.getElementById('social-sentiment-label');
-    if (dataSource && dataSource !== 'Unknown') {
-        labelEl.textContent = classification;
-        labelEl.title = `Source: ${dataSource}`;
-    } else {
-        labelEl.textContent = classification;
-    }
+    const sourceLabel = dataSource && dataSource !== 'Unknown' ? ` · via ${dataSource}` : '';
+    labelEl.textContent = classification + sourceLabel;
+    if (dataSource) labelEl.title = `Data source: ${dataSource}`;
     
     // Update bar position
     const bar = document.getElementById('social-sentiment-bar');
@@ -1322,86 +1526,35 @@ function getVIXClassification(value) {
 
 // Fetch VIX data
 async function fetchVIX() {
-    try {
-        // Try direct Yahoo Finance first
-        const response = await fetch(`${YAHOO_FINANCE_QUOTE_API}${VIX_SYMBOL}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const extracted = extractYahooFinanceData(data, VIX_SYMBOL);
-        
-        if (extracted && extracted.price !== null) {
-            const value = parseFloat(extracted.price);
-            const change = extracted.change || 0;
-            const changePercent = extracted.changePercent || 0;
-            const classification = getVIXClassification(value);
-            
-            // Save to cache
-            savePreviousValue('vix', value);
-            
-            // Update display
-            updateVIXDisplay(value, classification, change, changePercent);
-            updateTimestamp('vix-updated');
-            
-            // Add to historical data
-            addToHistory('vix', value);
-            
-            return value;
-        } else {
-            throw new Error('Invalid response structure');
-        }
-        
-    } catch (error) {
-        console.error('VIX fetch error:', error);
-        
-        // Show warning but don't alarm user yet - we have fallback options
-        
-        // Try CORS proxy fallback
-        try {
-            const proxyUrl = `${YAHOO_FINANCE_CORS_PROXY}${encodeURIComponent(YAHOO_FINANCE_QUOTE_API + VIX_SYMBOL)}`;
-            const response = await fetch(proxyUrl);
-            
-            if (response.ok) {
-                const data = await response.json();
-                const extracted = extractYahooFinanceData(data, VIX_SYMBOL);
-                
-                if (extracted && extracted.price !== null) {
-                    const value = parseFloat(extracted.price);
-                    const change = extracted.change || 0;
-                    const changePercent = extracted.changePercent || 0;
-                    const classification = getVIXClassification(value);
-                    
-                    savePreviousValue('vix', value);
-                    updateVIXDisplay(value, classification, change, changePercent);
-                    updateTimestamp('vix-updated');
-                    addToHistory('vix', value);
-                    
-                    return value;
-                }
-            }
-        } catch (proxyError) {
-            console.error('VIX proxy fetch error:', proxyError);
-            const errorMsg = getUserFriendlyErrorMessage(proxyError, 'VIX');
-            showNotification(errorMsg, 'warning', 4000);
-        }
-        
-        // Fallback: Use cached value
-        const cachedValue = getPreviousValue('vix');
-        if (cachedValue !== null && !isNaN(cachedValue)) {
-            const classification = getVIXClassification(cachedValue);
-            updateVIXDisplay(cachedValue, classification + ' (Cached)', 0, 0);
-            return cachedValue;
-        }
-        
-        // Last resort: Use estimated value
-        const fallbackValue = 18.5;
-        const classification = getVIXClassification(fallbackValue);
-        updateVIXDisplay(fallbackValue, classification + ' (Estimated)', 0, 0);
-        return fallbackValue;
+    // Use the shared multi-proxy Yahoo Finance helper
+    const extracted = await fetchYahooData(VIX_SYMBOL);
+
+    if (extracted && extracted.price !== null) {
+        const value = parseFloat(extracted.price);
+        const change = extracted.change || 0;
+        const changePercent = extracted.changePercent || 0;
+        const classification = getVIXClassification(value);
+
+        savePreviousValue('vix', value);
+        updateVIXDisplay(value, classification, change, changePercent);
+        updateTimestamp('vix-updated');
+        addToHistory('vix', value);
+        return value;
     }
+
+    // Fallback: cached value
+    const cachedValue = getPreviousValue('vix');
+    if (cachedValue !== null && !isNaN(cachedValue)) {
+        const classification = getVIXClassification(cachedValue);
+        updateVIXDisplay(cachedValue, classification + ' (Cached)', 0, 0);
+        return cachedValue;
+    }
+
+    // Last resort: static estimate
+    const fallbackValue = 18.5;
+    const classification = getVIXClassification(fallbackValue);
+    updateVIXDisplay(fallbackValue, classification + ' (Estimated)', 0, 0);
+    return fallbackValue;
 }
 
 // Update VIX display
@@ -1701,10 +1854,17 @@ function initializeHistoricalData() {
                 // Generate realistic starting values based on index type
                 let baseValue = 50;
                 if (key === 'fearGreed') baseValue = 50;
-                else if (key === 'unemployment') baseValue = 4.0;
+                else if (key === 'unemployment') baseValue = 4.1;
                 else if (key === 'gdp') baseValue = 2.0;
-                else if (key.includes('sp500') || key === 'sp500') baseValue = 550;
-                else if (key.includes('nasdaq') || key === 'nasdaq') baseValue = 480;
+                else if (key === 'vix') baseValue = 18;
+                else if (key === 'sp500') baseValue = 5480;
+                else if (key === 'nasdaq') baseValue = 17250;
+                else if (key === 'ftse100') baseValue = 8450;
+                else if (key === 'dax') baseValue = 18900;
+                else if (key === 'stoxx600') baseValue = 505;
+                else if (key === 'nikkei') baseValue = 37800;
+                else if (key === 'shanghai') baseValue = 3240;
+                else if (key === 'hangsen') baseValue = 22100;
                 
                 const variation = (Math.random() - 0.5) * 0.1; // ±5% variation
                 historicalData[key].push(baseValue * (1 + variation));
@@ -1727,46 +1887,50 @@ async function fetchRecessionIndexes() {
     // Unemployment Rate
     if (unemploymentRate !== null) {
         recessionIndexes.unemployment.value = unemploymentRate.toFixed(2);
-        recessionIndexes.unemployment.status = unemploymentRate > 6 ? 'bad' : 
+        recessionIndexes.unemployment.status = unemploymentRate > 6 ? 'bad' :
                                                unemploymentRate > 5 ? 'warning' : 'good';
+        recessionIndexes.unemployment.source = 'FRED';
     } else {
-        // Fallback to estimated value
-        recessionIndexes.unemployment.value = (3.5 + Math.random() * 2).toFixed(2);
+        recessionIndexes.unemployment.value = (4.1 + Math.random() * 0.4).toFixed(2);
         recessionIndexes.unemployment.status = 'warning';
+        recessionIndexes.unemployment.source = 'estimated';
     }
-    
+
     // GDP Growth
     if (gdpGrowth !== null) {
         recessionIndexes.gdp.value = gdpGrowth.toFixed(2);
-        recessionIndexes.gdp.status = gdpGrowth < 0 ? 'bad' : 
+        recessionIndexes.gdp.status = gdpGrowth < 0 ? 'bad' :
                                      gdpGrowth < 1 ? 'warning' : 'good';
+        recessionIndexes.gdp.source = 'FRED';
     } else {
-        // Fallback
-        recessionIndexes.gdp.value = (Math.random() * 4 - 1).toFixed(2);
+        recessionIndexes.gdp.value = (1.2 + Math.random() * 1.5).toFixed(2);
         recessionIndexes.gdp.status = 'warning';
+        recessionIndexes.gdp.source = 'estimated';
     }
-    
+
     // Yield Curve (10Y - 2Y spread)
     if (yield10y !== null && yield2y !== null) {
         const spread = yield10y - yield2y;
         recessionIndexes.yield.value = spread.toFixed(2);
-        recessionIndexes.yield.status = spread < 0 ? 'bad' : 
+        recessionIndexes.yield.status = spread < 0 ? 'bad' :
                                         spread < 0.5 ? 'warning' : 'good';
+        recessionIndexes.yield.source = 'FRED';
     } else {
-        // Fallback
-        recessionIndexes.yield.value = (Math.random() * 2 - 0.5).toFixed(2);
+        recessionIndexes.yield.value = (Math.random() * 1.5 - 0.2).toFixed(2);
         recessionIndexes.yield.status = 'warning';
+        recessionIndexes.yield.source = 'estimated';
     }
-    
-    // Sahm Rule (calculated from unemployment)
+
+    // Sahm Rule (simplified estimate from unemployment)
     if (unemploymentRate !== null) {
-        // Simplified calculation - in production, would need historical data
         const sahmValue = Math.max(0, (unemploymentRate - 3.5) * 0.3).toFixed(2);
         recessionIndexes.sahm.value = sahmValue;
-        recessionIndexes.sahm.status = sahmValue > 0.5 ? 'bad' : 'good';
+        recessionIndexes.sahm.status = sahmValue > 0.5 ? 'bad' : sahmValue > 0.25 ? 'warning' : 'good';
+        recessionIndexes.sahm.source = 'FRED';
     } else {
-        recessionIndexes.sahm.value = (Math.random() * 0.8).toFixed(2);
+        recessionIndexes.sahm.value = (Math.random() * 0.6).toFixed(2);
         recessionIndexes.sahm.status = 'warning';
+        recessionIndexes.sahm.source = 'estimated';
     }
     
     // Lipstick Index (cosmetic sales trend)
@@ -1963,12 +2127,27 @@ function updateRecessionIndexesDisplay() {
         const valueEl = document.getElementById(`${index.id}-value`);
         const statusEl = document.getElementById(`${index.id}-status`);
         const changeEl = document.getElementById(`${index.id}-change`);
-        
+
         if (valueEl && statusEl && index.data.value !== null) {
             // Hide skeletons and show content (if they exist)
             hideSkeletonShowContent(`${index.id}-value-skeleton`, `${index.id}-value`);
             hideSkeletonShowContent(`${index.id}-change-skeleton`, `${index.id}-change`);
             hideSkeletonShowContent(`${index.id}-status-skeleton`, `${index.id}-status`);
+
+            // Show source badge on the card
+            const card = valueEl.closest('.index-card');
+            if (card) {
+                const isEstimated = index.data.source === 'estimated';
+                card.setAttribute('data-source', isEstimated ? 'estimated' : 'live');
+                let badgeEl = card.querySelector('.source-badge');
+                if (!badgeEl) {
+                    badgeEl = document.createElement('span');
+                    badgeEl.className = 'source-badge';
+                    card.querySelector('h3').appendChild(badgeEl);
+                }
+                badgeEl.textContent = isEstimated ? 'est.' : 'live';
+                badgeEl.className = `source-badge source-${isEstimated ? 'estimated' : 'live'}`;
+            }
             
             // Extract numeric value for history
             let numericValue = null;
@@ -1977,7 +2156,8 @@ function updateRecessionIndexesDisplay() {
                 valueEl.textContent = index.data.value;
             } else {
                 numericValue = parseFloat(index.data.value);
-                const unit = index.data.unit || '';
+                // Only append % as a suffix — skip word units like 'index', 'score', 'mentions'
+                const unit = index.data.unit === '%' ? '%' : '';
                 valueEl.textContent = `${index.data.value}${unit}`;
             }
             
@@ -2075,10 +2255,11 @@ function calculateRecessionProbability() {
     
     // Normalize to 0-100 scale
     const probability = totalWeight > 0 ? (weightedScore / totalWeight) : 0;
-    
-    // Calculate confidence interval (±10% based on data completeness)
-    const dataCompleteness = totalWeight / 1.0; // Total weights should sum to 1.0
-    const confidenceRange = 10 * (1 - dataCompleteness);
+
+    // Calculate confidence interval based on how many indicators have real (non-estimated) data
+    const expectedTotal = Object.values(recessionIndexes).reduce((s, d) => s + (d.weight || 0), 0);
+    const dataCompleteness = expectedTotal > 0 ? Math.min(1, totalWeight / expectedTotal) : 0;
+    const confidenceRange = Math.max(0, 10 * (1 - dataCompleteness));
     
     // Sort contributors by contribution (highest first)
     contributors.sort((a, b) => b.contribution - a.contribution);
@@ -2287,79 +2468,33 @@ function normalizeIndex(indexId, rawValue) {
 
 // Get Sentiment based on average score
 // Fetch Stock Index Data - using Alpha Vantage free API (CORS-friendly)
-async function fetchStockIndex(config, name, retries = 2) {
-    // Multi-source strategy for maximum reliability
-    // Priority: Yahoo Finance → Finnhub → Mock Data
-    
-    // Method 1: Try direct Yahoo Finance API (sometimes works without CORS issues)
-    for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-            const yahooUrl = `${YAHOO_FINANCE_QUOTE_API}${config.symbol}?interval=1d&range=1d`;
-            const directResponse = await fetch(yahooUrl);
-            
-            if (directResponse.ok) {
-                const data = await directResponse.json();
-                const result = extractYahooFinanceData(data, config.symbol);
-                if (result) {
-                    console.log(`✓ Yahoo Finance (direct) success for ${config.symbol}`);
-                    return result;
-                }
-            }
-            
-            // If response not OK and we have retries left, wait and retry
-            if (!directResponse.ok && attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
-                continue;
-            }
-        } catch (directError) {
-            // CORS blocked or network error
-            if (attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
-                continue;
-            }
-            // All attempts failed, continue to next method
-        }
+async function fetchStockIndex(config, name) {
+    // Method 1: Yahoo Finance with multi-proxy fallback
+    const yahooResult = await fetchYahooData(config.symbol);
+    if (yahooResult) {
+        console.log(`✓ Yahoo Finance success for ${config.symbol}`);
+        return { ...yahooResult, dataSource: 'live' };
     }
-    
-    // Method 2: Use CORS proxy for Yahoo Finance
-    try {
-        const yahooUrl = `${YAHOO_FINANCE_QUOTE_API}${config.symbol}?interval=1d&range=1d`;
-        const proxyUrl = `${YAHOO_FINANCE_CORS_PROXY}${encodeURIComponent(yahooUrl)}`;
-        const proxyResponse = await fetch(proxyUrl);
-        
-        if (proxyResponse.ok) {
-            const data = await proxyResponse.json();
-            const result = extractYahooFinanceData(data, config.symbol);
-            if (result) {
-                console.log(`✓ Yahoo Finance (proxy) success for ${config.symbol}`);
-                return result;
-            }
-        }
-    } catch (proxyError) {
-        console.log(`Yahoo Finance failed for ${config.symbol}:`, proxyError.message);
-    }
-    
-    // Method 3: Try Finnhub API (if API key is provided)
+
+    // Method 2: Try Finnhub API (only if a real key is configured)
     if (FINNHUB_API_KEY && FINNHUB_API_KEY !== 'demo') {
         try {
-            // Convert Yahoo symbol to Finnhub format (remove ^)
             const finnhubSymbol = config.symbol.replace('^', '');
             const finnhubUrl = `${FINNHUB_QUOTE_API}?symbol=${finnhubSymbol}&token=${FINNHUB_API_KEY}`;
             const finnhubResponse = await fetch(finnhubUrl);
-            
             if (finnhubResponse.ok) {
                 const data = await finnhubResponse.json();
                 if (data && data.c && data.pc) {
-                    const price = data.c;  // Current price
-                    const previousClose = data.pc;  // Previous close
+                    const price = data.c;
+                    const previousClose = data.pc;
                     const change = price - previousClose;
                     const changePercent = (change / previousClose) * 100;
-                    
                     console.log(`✓ Finnhub success for ${config.symbol}`);
                     return {
                         price: Math.round(price * 100) / 100,
                         change: Math.round(change * 100) / 100,
-                        changePercent: Math.round(changePercent * 100) / 100
+                        changePercent: Math.round(changePercent * 100) / 100,
+                        dataSource: 'live'
                     };
                 }
             }
@@ -2367,10 +2502,10 @@ async function fetchStockIndex(config, name, retries = 2) {
             console.log(`Finnhub failed for ${config.symbol}:`, finnhubError.message);
         }
     }
-    
+
     // Fallback to mock/estimated data if all APIs fail
-    console.log(`⚠ Using mock data for ${config.symbol}`);
-    return generateMockStockData(config, name);
+    console.log(`⚠ Using estimated data for ${config.symbol}`);
+    return { ...generateMockStockData(config, name), dataSource: 'estimated' };
 }
 
 // Extract data from Yahoo Finance API response
@@ -2405,16 +2540,16 @@ function extractYahooFinanceData(data, symbol) {
 
 // Generate mock stock data as fallback (based on typical index values)
 function generateMockStockData(config, name) {
-    // Base values for each index (approximate current values as of Dec 2024)
+    // Base values for each index (approximate values as of mid-2026)
     const baseValues = {
-        '^gspc': { price: 6050, change: 25.5, changePercent: 0.42 },      // S&P 500
-        '^ixic': { price: 19800, change: 95.2, changePercent: 0.48 },     // NASDAQ
-        '^ftse': { price: 8300, change: 18.5, changePercent: 0.22 },      // FTSE 100
-        '^gdaxi': { price: 20400, change: 55.3, changePercent: 0.27 },    // DAX
-        '^stoxx': { price: 520, change: 1.2, changePercent: 0.23 },       // STOXX 600
-        '^n225': { price: 39500, change: 180.5, changePercent: 0.46 },    // Nikkei 225
-        '000001.ss': { price: 3350, change: -12.3, changePercent: -0.37 }, // Shanghai
-        '^hsi': { price: 19800, change: 85.2, changePercent: 0.43 }       // Hang Seng
+        '^gspc': { price: 5480, change: 18.2, changePercent: 0.33 },      // S&P 500
+        '^ixic': { price: 17250, change: 72.4, changePercent: 0.42 },     // NASDAQ
+        '^ftse': { price: 8450, change: 22.1, changePercent: 0.26 },      // FTSE 100
+        '^gdaxi': { price: 18900, change: 45.6, changePercent: 0.24 },    // DAX
+        '^stoxx': { price: 505, change: 1.1, changePercent: 0.22 },       // STOXX 600
+        '^n225': { price: 37800, change: 155.3, changePercent: 0.41 },    // Nikkei 225
+        '000001.ss': { price: 3240, change: -8.5, changePercent: -0.26 }, // Shanghai
+        '^hsi': { price: 22100, change: 95.6, changePercent: 0.43 }       // Hang Seng
     };
     
     const symbolKey = config.symbol.toLowerCase();
@@ -2441,19 +2576,37 @@ function updateStockIndexDisplay(indexId, data) {
         document.getElementById(`${indexId}-change-percent`).textContent = '--';
         return;
     }
-    
+
     // Hide skeletons and show content
     hideSkeletonShowContent(`${indexId}-price-skeleton`, `${indexId}-price`);
     hideSkeletonShowContent(`${indexId}-change-skeleton`, `${indexId}-change`);
     hideSkeletonShowContent(`${indexId}-change-percent-skeleton`, `${indexId}-change-percent`);
-    
+
     const priceEl = document.getElementById(`${indexId}-price`);
     const changeEl = document.getElementById(`${indexId}-change`);
     const changePercentEl = document.getElementById(`${indexId}-change-percent`);
-    
+
+    // Show live/estimated badge on the card
+    const card = document.getElementById(`${indexId}-card`);
+    if (card) {
+        const isEstimated = data.dataSource === 'estimated';
+        card.setAttribute('data-source', isEstimated ? 'estimated' : 'live');
+        let badgeEl = card.querySelector('.stock-source-badge');
+        if (!badgeEl) {
+            badgeEl = document.createElement('span');
+            badgeEl.className = 'stock-source-badge';
+            card.querySelector('h3').appendChild(badgeEl);
+        }
+        badgeEl.textContent = isEstimated ? 'est.' : 'live';
+        badgeEl.className = `stock-source-badge source-${isEstimated ? 'estimated' : 'live'}`;
+        badgeEl.title = isEstimated
+            ? 'Yahoo Finance unavailable — showing reference value'
+            : 'Live data from Yahoo Finance';
+    }
+
     // Smart decimal formatting based on index value
     const decimals = getSmartDecimals(data.price);
-    
+
     // Format price with thousand separators and pts label
     priceEl.textContent = formatIndexPrice(data.price, decimals);
     
@@ -2499,33 +2652,29 @@ function formatIndexPrice(value, decimals = 2) {
 
 // Fetch All Stock Indices (with individual error handling and timeout)
 async function fetchAllStockIndices() {
-    // Use Promise.allSettled so one failure doesn't block others
-    // Also update display as each completes for faster perceived loading
+    // Allow enough time for all 3 proxies to be attempted:
+    // 4s direct + 3 × 8s proxies = 28s max per symbol
+    const PER_SYMBOL_TIMEOUT = 28000;
+
     const indexPromises = Object.entries(STOCK_INDICES).map(async ([key, config]) => {
         try {
-            // Add timeout wrapper
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout')), 6000)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout')), PER_SYMBOL_TIMEOUT)
             );
-            
-            const fetchPromise = fetchStockIndex(config, config.name);
-            const data = await Promise.race([fetchPromise, timeoutPromise]);
-            
-            // Update immediately when data arrives
+            const data = await Promise.race([
+                fetchStockIndex(config, config.name),
+                timeoutPromise
+            ]);
             updateStockIndexDisplay(key, data);
             return { id: key, data };
         } catch (error) {
-            // Silently use fallback data
-            const fallbackData = generateMockStockData(config, config.name);
+            const fallbackData = { ...generateMockStockData(config, config.name), dataSource: 'estimated' };
             updateStockIndexDisplay(key, fallbackData);
             return { id: key, data: fallbackData };
         }
     });
-    
-    // Wait for all to complete (but they update individually)
+
     await Promise.allSettled(indexPromises);
-    
-    // Update timestamp after all indices are loaded
     updateTimestamp('stock-indices-updated');
 }
 

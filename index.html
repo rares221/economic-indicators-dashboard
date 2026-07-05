@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recession Index Dashboard</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -272,13 +272,17 @@
                     </div>
                 </div>
                 
-                <!-- Reddit Social Sentiment -->
+                <!-- Social Sentiment -->
                 <div class="fear-greed-panel social-sentiment-panel" id="social-sentiment-panel">
-                    <h3 class="fear-greed-panel-title">🗣️ Reddit Sentiment <span class="help-icon" data-tooltip="social-sentiment">?</span></h3>
+                    <h3 class="fear-greed-panel-title">🗣️ Social Sentiment <span class="help-icon" data-tooltip="social-sentiment">?</span></h3>
+                    <div class="manual-run-notice">
+                        <span class="manual-run-icon">👆</span>
+                        <span>Click to load · may use Apify credits</span>
+                    </div>
                     <div class="fear-greed-content">
                         <div class="skeleton skeleton-number-large" id="social-sentiment-skeleton"></div>
                         <div class="index-value" id="social-sentiment-value" style="display: none;">--</div>
-                        <div class="index-label" id="social-sentiment-label">Loading...</div>
+                        <div class="index-label" id="social-sentiment-label">Not loaded</div>
                         <div class="skeleton skeleton-change" id="social-sentiment-change-skeleton"></div>
                         <div class="gauge-change" id="social-sentiment-change" style="display: none;">--</div>
                         
@@ -294,9 +298,9 @@
                         </div>
                         
                         <div class="social-sentiment-sources">
-                            <span class="source-badge" title="r/wallstreetbets">🚀 WSB</span>
-                            <span class="source-badge" title="r/stocks">📈 r/stocks</span>
-                            <span class="source-badge" title="r/investing">💰 r/investing</span>
+                            <span class="source-tag" title="StockTwits">ST</span>
+                            <span class="source-tag" title="ApeWisdom / Reddit">AW</span>
+                            <span class="source-tag" title="r/wallstreetbets · r/stocks · r/investing">Reddit</span>
                         </div>
                     </div>
                 </div>
@@ -407,10 +411,14 @@
         <!-- Recession Indexes Section (Middle) -->
         <section class="recession-indexes">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Unofficial Recession Indexes</h2>
+                <h2>Recession Indicators</h2>
                 <button id="refresh-recession-indexes" class="refresh-button" title="Refresh Recession Indicators">🔄</button>
             </div>
             <div class="last-updated" id="recession-indexes-updated">--</div>
+            <div class="indicators-legend">
+                <span class="legend-item"><span class="source-badge source-live">live</span> Real-time data from FRED</span>
+                <span class="legend-item"><span class="source-badge source-estimated">est.</span> Illustrative / estimated value</span>
+            </div>
             <div class="indexes-grid">
                 <div class="index-card">
                     <h3><a href="https://en.wikipedia.org/wiki/Sahm_rule" target="_blank" rel="noopener noreferrer">Sahm Rule</a></h3>
@@ -781,7 +789,7 @@
     <!-- API Keys Configuration (gitignored - your keys stay private!) -->
     <script src="config.local.js" onerror="console.warn('⚠️ config.local.js not found. Copy config.example.js to config.local.js and add your API keys.')"></script>
     
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
 </body>
 </html>
 

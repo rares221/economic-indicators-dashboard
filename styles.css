@@ -744,6 +744,125 @@ body.dark-mode .source-badge {
     font-size: 1.8em;
 }
 
+.indicators-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    font-size: 0.82em;
+    color: #666;
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Manual-run notice on Social Sentiment card */
+.manual-run-notice {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72em;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}
+
+.manual-run-icon {
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+body.dark-mode .manual-run-notice {
+    background: #3a2a00;
+    border-color: #b45309;
+    color: #fcd34d;
+}
+
+/* Source tags inside social sentiment card */
+.social-sentiment-sources {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.source-tag {
+    font-size: 0.68em;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #e8eaf6;
+    color: #3949ab;
+    border: 1px solid #c5cae9;
+    cursor: default;
+}
+
+body.dark-mode .source-tag {
+    background: #1a1f4e;
+    color: #8b9aff;
+    border-color: #3a3f7e;
+}
+
+/* Source badges shared by both stock cards and recession indicator cards */
+.stock-source-badge {
+    display: inline-block;
+    font-size: 0.58em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 4px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 4px;
+    text-transform: uppercase;
+    line-height: 1.6;
+}
+
+/* Source badges on indicator cards */
+.source-badge {
+    display: inline-block;
+    font-size: 0.6em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 4px;
+    text-transform: uppercase;
+    line-height: 1.6;
+}
+
+.source-live {
+    background: #d4edda;
+    color: #1a7a3a;
+    border: 1px solid #b8dac4;
+}
+
+.source-estimated {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffe08a;
+}
+
+/* Dimmed style for estimated cards */
+.index-card[data-source="estimated"] {
+    opacity: 0.82;
+    border-color: #ddd;
+}
+
+.index-card[data-source="live"] {
+    border-color: #b8dac4;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.08);
+}
+
 .indexes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -758,7 +877,7 @@ body.dark-mode .source-badge {
     padding: 20px;
     text-align: center;
     border: 2px solid #e0e0e0;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
     overflow: visible;
     word-wrap: break-word;
     min-height: 140px;
@@ -770,6 +889,7 @@ body.dark-mode .source-badge {
 .index-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    opacity: 1 !important;
 }
 
 .index-card h3 {
@@ -778,13 +898,7 @@ body.dark-mode .source-badge {
     color: #555;
     font-weight: 600;
     line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    max-height: 2.4em;
+    overflow: visible;
     word-break: break-word;
     hyphens: auto;
 }
@@ -1154,6 +1268,32 @@ body.dark-mode .index-card {
     background: #252538;
     border-color: #3a3a4e;
     color: #e0e0e0;
+}
+
+body.dark-mode .index-card[data-source="live"] {
+    border-color: #2a5c3a;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.12);
+}
+
+body.dark-mode .index-card[data-source="estimated"] {
+    opacity: 0.75;
+    border-color: #3a3a4e;
+}
+
+body.dark-mode .source-live {
+    background: #1a3a27;
+    color: #6fcf97;
+    border-color: #2a5c3a;
+}
+
+body.dark-mode .source-estimated {
+    background: #3a3010;
+    color: #f2c94c;
+    border-color: #6a5500;
+}
+
+body.dark-mode .indicators-legend {
+    color: #9ca3af;
 }
 
 body.dark-mode .index-card:hover {
